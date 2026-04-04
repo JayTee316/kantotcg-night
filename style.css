@@ -6,7 +6,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap');
 
 :root {
-  /* FireRed / LeafGreen accents — kept vibrant against dark bg */
   --fr-red:       #e83010;
   --fr-red-dark:  #a82000;
   --fr-red-light: #ff5030;
@@ -14,41 +13,33 @@
   --lg-green-dk:  #1a8828;
   --lg-green-lt:  #40d050;
 
-  /* Night grey palette */
-  --bg:       #161820;   /* deepest — page background */
-  --bg2:      #1c1e28;   /* slightly lighter */
-  --surface:  #22242f;   /* card surface */
-  --surface2: #282a36;   /* elevated surface */
-  --surface3: #2e3040;   /* hover / subtle raise */
+  /* Very dark night palette */
+  --bg:       #080810;
+  --bg2:      #0d0e18;
+  --surface:  #111320;
+  --surface2: #161828;
+  --surface3: #1c1e30;
 
-  /* Borders */
-  --border:   rgba(255,255,255,0.08);
-  --border2:  rgba(255,255,255,0.14);
-  --border3:  rgba(255,255,255,0.22);
+  --border:   rgba(255,255,255,0.05);
+  --border2:  rgba(255,255,255,0.09);
+  --border3:  rgba(255,255,255,0.14);
 
-  /* Text */
-  --text:     #e8eaf0;
-  --text2:    #c0c4d0;
-  --muted:    #808494;
-  --muted2:   #50536a;
+  --text:     #c8cad8;
+  --text2:    #888a9a;
+  --muted:    #505265;
+  --muted2:   #303245;
 
-  /* Accents */
-  --gold:     #e8b820;
-  --gold2:    #b08800;
-  --blue:     #4878e8;
-  --blue-lt:  #7aa8ff;
+  --gold:     #c89810;
+  --gold2:    #906800;
+  --blue:     #3060c8;
+  --blue-lt:  #5880e0;
 
-  /* Nav */
-  --nav-bg:   #0f1018;
+  --nav-bg:   #050508;
+  --shadow:   rgba(0,0,0,0.7);
 
-  /* Shadow */
-  --shadow:   rgba(0,0,0,0.5);
-
-  /* Fonts */
   --sans:     'Inter', sans-serif;
   --display:  'Barlow Condensed', 'Inter', sans-serif;
 
-  /* Sharp radii — minimal */
   --r-sm: 2px;
   --r-md: 4px;
   --r-lg: 6px;
@@ -87,7 +78,7 @@ body {
 .nav-logo {
   font-family: var(--display);
   font-size: 17px; font-weight: 800; letter-spacing: 1px;
-  color: #fff; text-decoration: none; margin-right: 28px;
+  color: var(--text); text-decoration: none; margin-right: 28px;
   flex-shrink: 0; display: flex; align-items: center; gap: 8px;
   text-transform: uppercase;
 }
@@ -163,8 +154,8 @@ body {
   display: inline-block; letter-spacing: 0.4px;
   text-transform: uppercase;
 }
-.b-rare   { background:rgba(232,184,32,.15);  color:#d8a820; border:1px solid rgba(232,184,32,.3); }
-.b-holo   { background:rgba(72,120,232,.15);  color:#6898f0; border:1px solid rgba(72,120,232,.3); }
+.b-rare   { background:rgba(200,152,16,.12);  color:#c89810; border:1px solid rgba(232,184,32,.3); }
+.b-holo   { background:rgba(48,96,200,.12);  color:#5878d8; border:1px solid rgba(72,120,232,.3); }
 .b-ex     { background:rgba(232,48,16,.15);   color:#e85030; border:1px solid rgba(232,48,16,.3);  }
 .b-promo  { background:rgba(40,184,56,.15);   color:#38c848; border:1px solid rgba(40,184,56,.3);  }
 .b-common { background:rgba(128,132,148,.1);  color:var(--muted); border:1px solid rgba(128,132,148,.2); }
@@ -183,15 +174,15 @@ body {
 }
 .btn-buy   { background: var(--fr-red); color: #fff; border-color: var(--fr-red-dark); }
 .btn-buy:hover { background: var(--fr-red-light); }
-.btn-psa   { background: var(--surface2); color: var(--gold); border-color: rgba(232,184,32,.3); }
+.btn-psa   { background: var(--surface); color: var(--gold); border-color: rgba(232,184,32,.3); }
 .btn-psa:hover { background: var(--surface3); border-color: var(--gold); }
-.btn-sales { background: var(--surface2); color: var(--blue-lt); border-color: rgba(72,120,232,.3); }
+.btn-sales { background: var(--surface); color: var(--blue-lt); border-color: rgba(72,120,232,.3); }
 .btn-sales:hover { background: var(--surface3); border-color: var(--blue-lt); }
 
 /* ── SPINNER ── */
 .spinner {
   display: inline-block; width: 28px; height: 28px;
-  border: 2px solid var(--border2); border-top-color: var(--fr-red);
+  border: 2px solid var(--border); border-top-color: var(--fr-red);
   border-radius: 50%; animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -262,7 +253,7 @@ body {
 
 /* ── MODAL ── */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88);
   z-index: 999; display: none; align-items: center; justify-content: center;
   padding: 20px; backdrop-filter: blur(6px);
 }

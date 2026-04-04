@@ -19,7 +19,7 @@
     background:
       radial-gradient(ellipse 65% 100% at 20% 60%, rgba(232,48,16,0.08) 0%, transparent 60%),
       radial-gradient(ellipse 55% 80% at 80% 40%, rgba(40,184,56,0.07) 0%, transparent 55%),
-      linear-gradient(150deg, #161820 0%, #1a1c28 50%, #161a20 100%);
+      linear-gradient(150deg, #080810 0%, #0d0e18 50%, #080810 100%);
   }
   /* Pokéball halves decoration */
   .hero-deco {
@@ -36,7 +36,7 @@
   .hero-deco::after {
     content: ''; position: absolute;
     left: -6px; right: -6px; top: 50%; height: 4px;
-    background: rgba(128,132,148,0.15);
+    background: rgba(128,132,148,0.05);
   }
   .hero-inner { max-width: 1280px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
 
@@ -77,17 +77,17 @@
     font-weight: 400;
   }
   .frlg-btn.primary {
-    background: var(--fr-red); color: #fff;
+    background: var(--fr-red); color: var(--text);
     box-shadow: 0 3px 0 var(--fr-red-dark), 0 6px 20px rgba(232,48,16,0.3);
   }
   .frlg-btn.primary:hover { background: var(--fr-red-light); transform: translateY(-2px); box-shadow: 0 5px 0 var(--fr-red-dark), 0 10px 28px rgba(232,48,16,0.35); }
   .frlg-btn.secondary {
-    background: var(--lg-green); color: #fff;
+    background: var(--lg-green); color: var(--text);
     box-shadow: 0 3px 0 var(--lg-green-dk), 0 6px 20px rgba(48,168,64,0.25);
   }
   .frlg-btn.secondary:hover { background: var(--lg-green-lt); transform: translateY(-2px); }
   .frlg-btn.outline {
-    background: var(--bg2); color: var(--text2);
+    background: var(--bg); color: var(--text2);
     border: 2px solid var(--border); box-shadow: 0 3px 0 var(--border2);
   }
   .frlg-btn.outline:hover { border-color: var(--fr-red); color: var(--fr-red); }
@@ -95,7 +95,7 @@
   /* FRLG info boxes */
   .hero-info-boxes { display: flex; gap: 16px; flex-wrap: wrap; }
   .info-box {
-    background: var(--bg2); border: 2px solid var(--border);
+    background: var(--bg); border: 2px solid var(--border);
     border-radius: var(--r-lg); padding: 16px 20px;
     box-shadow: 0 3px 0 var(--border2), 0 4px 12px var(--shadow);
     min-width: 110px; text-align: center;
@@ -107,7 +107,7 @@
   /* ── CONTROLS ── */
   .controls {
     position: sticky; top: 56px; z-index: 100;
-    background: var(--bg2);
+    background: var(--bg);
     border-bottom: 3px solid var(--border);
     box-shadow: 0 2px 16px rgba(0,0,0,0.4);
     padding: 0 40px;
@@ -129,7 +129,7 @@
   .ctrl-right { margin-left: auto; display: flex; align-items: center; gap: 12px; padding: 10px 0 10px 20px; flex-shrink: 0; }
   .count-chip { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
   input#search-box {
-    background: var(--bg2); border: 2px solid var(--border);
+    background: var(--bg); border: 2px solid var(--border);
     color: var(--text); font-family: var(--sans); font-size: 13px; font-weight: 600;
     padding: 7px 14px; border-radius: 20px; width: 180px; outline: none;
     transition: border-color 0.2s;
@@ -144,16 +144,16 @@
   .starters-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 48px; }
   .starter-card {
     display: flex; gap: 18px; align-items: center;
-    background: var(--bg2); border: 2px solid var(--border);
+    background: var(--bg); border: 2px solid var(--border);
     border-radius: var(--r-xl);
     box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     padding: 18px 22px; text-decoration: none; color: var(--text);
     transition: transform 0.15s, box-shadow 0.15s;
   }
   .starter-card:hover { transform: translateY(-4px); box-shadow: 0 7px 0 var(--border2), 0 14px 36px var(--shadow); }
-  .starter-card.fire { border-color: rgba(240,128,48,.3); }
-  .starter-card.water { border-color: rgba(104,144,240,.3); }
-  .starter-card.grass { border-color: rgba(120,200,80,.3); }
+  .starter-card.fire { border-color: rgba(240,128,48,.18); }
+  .starter-card.water { border-color: rgba(104,144,240,.18); }
+  .starter-card.grass { border-color: rgba(120,200,80,.18); }
   .starter-img { width: 80px; height: 80px; flex-shrink: 0; }
   .starter-img img { width: 100%; height: 100%; object-fit: contain; }
   .starter-chip { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
@@ -170,7 +170,7 @@
 
   /* ── POKEMON CARD ── */
   .poke-card {
-    background: var(--bg2); border: 2px solid var(--border);
+    background: var(--bg); border: 2px solid var(--border);
     border-radius: var(--r-xl);
     box-shadow: none;
     text-decoration: none; display: flex; flex-direction: column;
@@ -181,7 +181,7 @@
   .poke-card:hover { transform: translateY(-4px); box-shadow: 0 7px 0 var(--border2), 0 12px 28px var(--shadow); }
 
   .poke-card-img {
-    background: var(--bg2);
+    background: var(--bg);
     aspect-ratio: 1; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
     padding: 12px; border-bottom: 2px solid var(--border);
@@ -205,7 +205,7 @@
   .poke-card-footer {
     border-top: 2px solid var(--border); padding: 8px 12px;
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg2); margin-top: auto;
+    background: var(--bg); margin-top: auto;
   }
   .poke-card-dex { font-size: 10px; font-weight: 800; color: var(--muted); }
   .poke-card-arrow { font-size: 14px; font-weight: 900; color: var(--fr-red); transition: transform 0.15s; }
@@ -223,7 +223,7 @@
 
   /* ── LEGENDARY BANNER ── */
   .legendary-banner {
-    background: var(--surface);
+    background: var(--bg);
     border: 2px solid var(--border);
     border-radius: var(--r-xl); padding: 20px 28px;
     display: flex; align-items: center; gap: 20px;
@@ -277,7 +277,7 @@
     <p class="hero-subtitle">The Original 151 — Complete Card Collection</p>
     <p class="hero-desc">Every English-language TCG card for all 151 original Kanto Pokémon. Live card images, current market prices, PSA population data, and direct buy links.</p>
     <div class="btn-row">
-      <a class="frlg-btn primary" href="#pokemon-section">View Full Pokédex →</a>
+      <a class="frlg-btn primary" style="color:#fff" href="#pokemon-section">View Full Pokédex →</a>
       <a class="frlg-btn secondary" href="charizard.html">Start with Charizard</a>
       <a class="frlg-btn outline" href="mewtwo.html">Legendary Cards</a>
     </div>
@@ -332,7 +332,7 @@
       <div class="legendary-banner-desc">Articuno, Zapdos, Moltres, Mewtwo and Mew — some of the most valuable and iconic cards in the entire hobby.</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
-      <a class="frlg-btn primary" href="articuno.html">Articuno</a>
+      <a class="frlg-btn primary" style="color:#fff" href="articuno.html">Articuno</a>
       <a class="frlg-btn outline" href="zapdos.html">Zapdos</a>
       <a class="frlg-btn outline" href="moltres.html">Moltres</a>
       <a class="frlg-btn secondary" href="mewtwo.html">Mewtwo</a>
@@ -477,7 +477,7 @@ function handleSearch(val) {
 /* file:// warning */
 if (window.location.protocol === 'file:') {
   const w = document.createElement('div');
-  w.style.cssText = 'background:rgba(232,184,32,.1);border-bottom:2px solid rgba(232,184,32,.3);padding:12px 32px;font-size:12px;font-weight:600;color:var(--gold);';
+  w.style.cssText = 'background:rgba(200,152,16,.08);border-bottom:1px solid rgba(200,152,16,.25);padding:12px 32px;font-size:12px;font-weight:600;color:var(--gold);';
   w.innerHTML = '⚠️ <strong>To load card images:</strong> use the START-WINDOWS.bat or START-MAC-LINUX.sh launcher, then open <strong>http://localhost:8080</strong>';
   document.body.insertBefore(w, document.body.firstChild);
 }
