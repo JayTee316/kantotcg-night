@@ -404,34 +404,45 @@ async function fetchEN(name) {
 }
 
 /* Fetch JP or CN cards from TCGdex — uses Pokédex number to find all prints */
-/* TCGdex: search by Pokémon name (works for JP/CN translated names too via the name= filter)
-   API format: https://api.tcgdex.net/v2/{lang}/cards?name=eq:{EnglishName}
-   TCGdex handles name translation internally — querying English name returns correct JP/CN results */
-async function fetchTCGdex(pokeName, langCode) {
+/* TCGdex: fetch ALL JP/CN prints by Pokédex number.
+   Correct endpoint: GET /v2/{lang}/dexids/{number}
+   Returns array of CardBrief objects. Then fetch full details in parallel batches. */
+async function fetchTCGdex(pokeId, langCode) {
   try {
-    const enc = encodeURIComponent(pokeName);
-    // TCGdex uses ?name=eq: for exact match, returns cards in the requested language
-    const url = `https://api.tcgdex.net/v2/${langCode}/cards?name=eq:${enc}`;
+    // Step 1: get all card stubs for this Pokédex number in this language
+    const url = `https://api.tcgdex.net/v2/${langCode}/dexids/${pokeId}`;
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 10000);
+    const t = setTimeout(() => ctrl.abort(), 12000);
     const r = await fetch(url, { signal: ctrl.signal });
     clearTimeout(t);
-    if (!r.ok) return [];
+    if (!r.ok) {
+      console.warn(`TCGdex ${langCode}/dexids/${pokeId} returned ${r.status}`);
+      return [];
+    }
     const raw = await r.json();
-    const cards = Array.isArray(raw) ? raw : [];
-    if (!cards.length) return [];
-    // TCGdex brief cards only have id/name/image — fetch full details for first 60 in parallel
-    // (full details give us rarity, set info, artist etc.)
-    const toFetch = cards.slice(0, 80);
-    const detailed = await Promise.all(
-      toFetch.map(async c => {
-        try {
-          const dr = await fetch(`https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`, { signal: AbortSignal.timeout(6000) });
-          if (!dr.ok) return c;
-          return await dr.json();
-        } catch { return c; }
-      })
-    );
+    const briefs = Array.isArray(raw) ? raw : [];
+    if (!briefs.length) return [];
+
+    // Step 2: fetch full details in parallel batches of 15
+    const BATCH = 15;
+    let detailed = [];
+    for (let i = 0; i < Math.min(briefs.length, 200); i += BATCH) {
+      const batch = briefs.slice(i, i + BATCH);
+      const results = await Promise.all(
+        batch.map(async c => {
+          try {
+            const dr = await fetch(
+              `https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`,
+              { signal: AbortSignal.timeout(8000) }
+            );
+            return dr.ok ? await dr.json() : c;
+          } catch { return c; }
+        })
+      );
+      detailed = detailed.concat(results);
+    }
+
+    // Step 3: normalise to our display format
     return detailed.map(c => ({
       id:       `tcgdex-${langCode}-${c.id}`,
       name:     c.name || '',
@@ -441,13 +452,13 @@ async function fetchTCGdex(pokeName, langCode) {
       hp:       c.hp ? String(c.hp) : null,
       subtypes: c.stage ? [c.stage] : [],
       images: {
-        small: c.image ? c.image + '/low.webp' : '',
+        small: c.image ? c.image + '/low.webp'  : '',
         large: c.image ? c.image + '/high.webp' : '',
       },
       set: {
-        name:        c.set?.name || '',
+        name:        c.set?.name        || '',
         series:      c.set?.serie?.name || c.set?.serie || '',
-        id:          c.set?.id || '',
+        id:          c.set?.id          || '',
         releaseDate: c.set?.releaseDate || '',
       },
       tcgplayer: null,
@@ -493,13 +504,13 @@ async function fetchCards(name) {
         `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> in all languages…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">EN from TCGPlayer · JP + CN from TCGdex</span></div>`;
       const [en, ja, zhTW] = await Promise.all([
         fetchEN(name),
-        fetchTCGdex(name, 'ja'),
-        fetchTCGdex(name, 'zh-TW'),
+        fetchTCGdex(curPoke.id, 'ja'),
+        fetchTCGdex(curPoke.id, 'zh-TW'),
       ]);
       cards = [...en, ...ja, ...zhTW];
     } else {
-      // JP or CN via TCGdex — pass English name, TCGdex handles translation lookup
-      cards = await fetchTCGdex(name, activeLang);
+      // JP or CN via TCGdex — use Pokédex ID for language-independent lookup
+      cards = await fetchTCGdex(curPoke.id, activeLang);
     }
 
     // Deduplicate by id
