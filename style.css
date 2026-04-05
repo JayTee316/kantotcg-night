@@ -331,3 +331,252 @@ body {
   .nav-logo { font-size: 14px; margin-right: 16px; }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   GAME BOY THEME — toggled via [data-theme="gb"] on <html>
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+[data-theme="gb"] {
+  --fr-red:       #9bbc0f;
+  --fr-red-dark:  #306230;
+  --fr-red-light: #8bac0f;
+  --lg-green:     #9bbc0f;
+  --lg-green-dk:  #306230;
+  --lg-green-lt:  #8bac0f;
+
+  --bg:       #0f380f;
+  --bg2:      #0a280a;
+  --surface:  #163016;
+  --surface2: #1a3c1a;
+  --surface3: #204020;
+
+  --border:   rgba(155,188,15,0.2);
+  --border2:  rgba(155,188,15,0.4);
+  --border3:  rgba(155,188,15,0.6);
+
+  --text:     #9bbc0f;
+  --text2:    #8bac0f;
+  --muted:    #4a6e0a;
+  --muted2:   #306230;
+
+  --gold:     #9bbc0f;
+  --gold2:    #306230;
+  --blue:     #8bac0f;
+  --blue-lt:  #9bbc0f;
+
+  --nav-bg:   #071807;
+  --shadow:   rgba(0,0,0,0.8);
+
+  --sans:     'VT323', monospace;
+  --display:  'Press Start 2P', monospace;
+
+  /* Sharp pixel corners */
+  --r-sm: 0px;
+  --r-md: 0px;
+  --r-lg: 0px;
+  --r-xl: 0px;
+}
+
+/* GB — scanline overlay on body */
+[data-theme="gb"] body {
+  font-size: 18px;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+  );
+  image-rendering: pixelated;
+}
+
+/* GB — nav */
+[data-theme="gb"] .site-nav { border-bottom: 3px solid #9bbc0f; }
+[data-theme="gb"] .nav-link { font-size: 8px; letter-spacing: 0.5px; }
+[data-theme="gb"] .nav-link.active { color: #9bbc0f; border-bottom-color: #9bbc0f; }
+[data-theme="gb"] .nav-link:hover { color: #9bbc0f; }
+
+/* GB — logo text */
+[data-theme="gb"] .nav-logo { font-family: 'Press Start 2P', monospace; font-size: 9px; letter-spacing: 1px; color: #9bbc0f; }
+[data-theme="gb"] .nav-logo .fr,
+[data-theme="gb"] .nav-logo .lg { color: #9bbc0f; }
+
+/* GB — pixel borders on cards */
+[data-theme="gb"] .pcard {
+  border: 2px solid #306230;
+  box-shadow: 3px 3px 0 #0a280a;
+  border-radius: 0;
+}
+[data-theme="gb"] .pcard:hover {
+  transform: translate(-2px,-2px);
+  border-color: #9bbc0f;
+  box-shadow: 5px 5px 0 #0a280a;
+}
+[data-theme="gb"] .pcard.notable { border-color: #9bbc0f; box-shadow: 3px 3px 0 #0a280a; }
+[data-theme="gb"] .pcard-name { font-size: 9px; letter-spacing: 0.3px; line-height: 1.8; }
+[data-theme="gb"] .pcard-set  { font-size: 12px; }
+[data-theme="gb"] .pcard-img-wrap { background: #0a280a; border-bottom: 2px solid #306230; }
+[data-theme="gb"] .pcard-actions { background: #0a280a; border-top: 2px solid #306230; }
+[data-theme="gb"] .year-tag { background: rgba(0,0,0,0.7); border: 1px solid #306230; }
+[data-theme="gb"] .notable-ribbon { background: #9bbc0f; color: #0f380f; border-radius: 0; }
+
+/* GB — price */
+[data-theme="gb"] .price-val { color: #9bbc0f; font-size: 14px; }
+
+/* GB — badges pixel style */
+[data-theme="gb"] .badge { border-radius: 0; font-size: 8px; }
+[data-theme="gb"] .b-rare,
+[data-theme="gb"] .b-holo,
+[data-theme="gb"] .b-ex,
+[data-theme="gb"] .b-ultra,
+[data-theme="gb"] .b-sr   { color: #9bbc0f; border-color: #306230; background: rgba(155,188,15,0.1); }
+[data-theme="gb"] .b-promo  { color: #9bbc0f; border-color: #9bbc0f; background: rgba(155,188,15,0.2); }
+[data-theme="gb"] .b-common { color: #4a6e0a; border-color: #1a3c1a; background: transparent; }
+
+/* GB — action buttons */
+[data-theme="gb"] .btn-buy   { background: #306230; color: #9bbc0f; border: 2px solid #9bbc0f; border-radius: 0; }
+[data-theme="gb"] .btn-buy:hover { background: #0f380f; }
+[data-theme="gb"] .btn-psa,
+[data-theme="gb"] .btn-sales { background: #163016; color: #8bac0f; border: 2px solid #306230; border-radius: 0; }
+[data-theme="gb"] .btn-psa:hover,
+[data-theme="gb"] .btn-sales:hover { background: #0a280a; border-color: #9bbc0f; }
+
+/* GB — spinner pixel style */
+[data-theme="gb"] .spinner {
+  border-color: #306230; border-top-color: #9bbc0f;
+  border-radius: 0; animation: gb-spin 0.6s steps(8) infinite;
+  border-width: 3px;
+}
+@keyframes gb-spin { to { transform: rotate(360deg); } }
+[data-theme="gb"] .status-block { font-size: 9px; line-height: 2.5; letter-spacing: 0.3px; }
+
+/* GB — modal */
+[data-theme="gb"] .modal {
+  background: var(--surface); border: 3px solid #9bbc0f;
+  border-radius: 0; box-shadow: 6px 6px 0 #0a280a;
+}
+[data-theme="gb"] .modal-close { background: #163016; border: 2px solid #9bbc0f; border-radius: 0; color: #9bbc0f; font-size: 8px; }
+[data-theme="gb"] .modal-name { font-size: 14px; line-height: 1.8; }
+[data-theme="gb"] .modal-price-big { font-size: 22px; color: #9bbc0f; }
+
+/* GB — type tags pixel style */
+[data-theme="gb"] .type-tag { border-radius: 0; font-size: 8px; padding: 1px 5px; }
+[data-theme="gb"] .tt-normal,
+[data-theme="gb"] .tt-fire,
+[data-theme="gb"] .tt-water,
+[data-theme="gb"] .tt-grass,
+[data-theme="gb"] .tt-electric,
+[data-theme="gb"] .tt-ice,
+[data-theme="gb"] .tt-fighting,
+[data-theme="gb"] .tt-poison,
+[data-theme="gb"] .tt-ground,
+[data-theme="gb"] .tt-flying,
+[data-theme="gb"] .tt-psychic,
+[data-theme="gb"] .tt-bug,
+[data-theme="gb"] .tt-rock,
+[data-theme="gb"] .tt-ghost,
+[data-theme="gb"] .tt-dragon { background: rgba(155,188,15,0.15); color: #9bbc0f; }
+
+/* GB — era labels, sections */
+[data-theme="gb"] .era-label { font-size: 7px; letter-spacing: 0.5px; color: #8bac0f; }
+[data-theme="gb"] .era-label::after { background: #306230; height: 2px; }
+[data-theme="gb"] .section-title { font-size: 14px; letter-spacing: 1px; }
+[data-theme="gb"] .section-sub { font-size: 16px; }
+
+/* GB — market cards */
+[data-theme="gb"] .market-card { border: 2px solid #306230; border-radius: 0; box-shadow: 3px 3px 0 #0a280a; }
+[data-theme="gb"] .market-card:hover { border-color: #9bbc0f; }
+[data-theme="gb"] .market-name { font-size: 9px; letter-spacing: 0.3px; }
+[data-theme="gb"] .market-tag { border-radius: 0; background: rgba(155,188,15,0.12); color: #9bbc0f; border-color: #306230; }
+
+/* GB — footer */
+[data-theme="gb"] .site-footer { border-top: 3px solid #306230; }
+[data-theme="gb"] .site-footer p { font-size: 7px; color: #4a6e0a; letter-spacing: 0.3px; line-height: 2.5; }
+
+/* GB — era/page controls */
+[data-theme="gb"] .era-tab,
+[data-theme="gb"] .era-tab.active { font-size: 8px; letter-spacing: 0.3px; }
+[data-theme="gb"] .era-tab.active { color: #9bbc0f; border-bottom-color: #9bbc0f; }
+[data-theme="gb"] .ctrl-select {
+  background: #163016; border: 2px solid #9bbc0f; border-radius: 0;
+  color: #9bbc0f; font-family: 'Press Start 2P', monospace; font-size: 7px;
+}
+[data-theme="gb"] .count-chip { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #4a6e0a; }
+
+/* GB — hero page controls */
+[data-theme="gb"] .page-controls { background: #071807; border-bottom: 3px solid #9bbc0f; }
+[data-theme="gb"] .h-stat { background: #0a280a; border: 2px solid #306230; border-radius: 0; }
+[data-theme="gb"] .h-stat-val { font-size: 11px; color: #9bbc0f; }
+[data-theme="gb"] .h-stat-label { font-size: 6px; color: #4a6e0a; }
+
+/* GB — search dropdown */
+[data-theme="gb"] .search-dropdown,
+[data-theme="gb"] #nav-search-dd {
+  background: #0f380f; border: 2px solid #9bbc0f;
+  border-top: 3px solid #9bbc0f; border-radius: 0;
+  box-shadow: 4px 4px 0 #0a280a;
+}
+[data-theme="gb"] .search-result,
+[data-theme="gb"] .nav-sd-item { color: #9bbc0f; border-color: #306230; }
+[data-theme="gb"] .search-result:hover,
+[data-theme="gb"] .search-result.focused,
+[data-theme="gb"] .nav-sd-item:hover,
+[data-theme="gb"] .nav-sd-item.nsd-focused { background: #163016; color: #9bbc0f; }
+[data-theme="gb"] .search-result-name,
+[data-theme="gb"] .nav-sd-name { font-size: 8px; letter-spacing: 0.3px; }
+[data-theme="gb"] .search-result-num,
+[data-theme="gb"] .nav-sd-num { color: #4a6e0a; }
+[data-theme="gb"] .search-no-results { color: #4a6e0a; font-size: 8px; }
+
+/* GB — filter bar */
+[data-theme="gb"] .type-dropdown-btn,
+[data-theme="gb"] .filter-search {
+  background: #163016; border: 2px solid #9bbc0f; border-radius: 0;
+  color: #9bbc0f; font-family: 'Press Start 2P', monospace; font-size: 7px;
+}
+[data-theme="gb"] .type-dropdown-btn:focus,
+[data-theme="gb"] .filter-search:focus { border-color: #9bbc0f; }
+[data-theme="gb"] .filter-search::placeholder { color: #306230; }
+
+/* GB — refresh button */
+[data-theme="gb"] .refresh-btn {
+  background: #163016; border: 2px solid #9bbc0f; border-radius: 0; color: #9bbc0f;
+}
+[data-theme="gb"] .refresh-btn:hover { background: #0a280a; }
+
+/* GB — price-ts */
+[data-theme="gb"] .price-ts { font-family: 'Press Start 2P', monospace; font-size: 6px; color: #4a6e0a; }
+
+/* GB — poke hero */
+[data-theme="gb"] .poke-hero { background: #071807; }
+[data-theme="gb"] .poke-hero h1 { font-size: clamp(12px, 2.5vw, 22px); line-height: 1.8; letter-spacing: 1px; color: #9bbc0f; }
+[data-theme="gb"] .poke-hero-desc { font-size: 18px; color: #8bac0f; }
+[data-theme="gb"] .hero-eyebrow { font-size: 7px; color: #4a6e0a; }
+[data-theme="gb"] .hero-type-row .type-tag { font-size: 8px; }
+[data-theme="gb"] .dex-bg-num { color: rgba(155,188,15,0.04); }
+
+/* GB — auto info banner */
+[data-theme="gb"] #auto-info {
+  border-left-color: #9bbc0f; background: #163016; border-color: #306230;
+}
+[data-theme="gb"] .auto-update-badge { background: rgba(155,188,15,0.1); color: #9bbc0f; border-color: #306230; }
+
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  background: var(--surface2); border: 2px solid var(--border2);
+  color: var(--text); font-family: var(--sans); font-size: 11px; font-weight: 800;
+  padding: 9px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: all 0.15s; border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+.theme-toggle:hover { border-color: var(--fr-red); color: var(--fr-red); }
+.theme-toggle-icon { font-size: 16px; line-height: 1; }
+
+[data-theme="gb"] .theme-toggle {
+  background: #163016; border: 2px solid #9bbc0f; color: #9bbc0f;
+  border-radius: 0; font-family: 'Press Start 2P', monospace; font-size: 7px;
+  box-shadow: 3px 3px 0 #0a280a; letter-spacing: 0.5px;
+}
+[data-theme="gb"] .theme-toggle:hover { background: #0a280a; }
