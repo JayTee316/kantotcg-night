@@ -100,11 +100,45 @@
   <div class="site-nav-inner">
     <a class="nav-logo" href="index.html">
       <span class="nav-logo-icon">⬟</span>
-      <span class="fr">FIRE</span><span class="lg">RED</span>&nbsp;TCG
+      <span class="fr">KANTO</span>&nbsp;<span class="lg">TCG</span>
     </a>
     <div class="nav-links" id="nav-links">
       <a class="nav-link" href="index.html">Home</a>
       <a class="nav-link" href="index.html#pokemon-section">Pokédex</a>
+
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Starters ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Starter Pokémon</div>
+          <a href="bulbasaur.html">Bulbasaur</a><a href="ivysaur.html">Ivysaur</a><a href="venusaur.html">Venusaur</a>
+          <div class="ndm-divider"></div>
+          <a href="charmander.html">Charmander</a><a href="charmeleon.html">Charmeleon</a><a href="charizard.html">Charizard ★</a>
+          <div class="ndm-divider"></div>
+          <a href="squirtle.html">Squirtle</a><a href="wartortle.html">Wartortle</a><a href="blastoise.html">Blastoise ★</a>
+        </div>
+      </div>
+
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Legendaries ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Legendary &amp; Mythical</div>
+          <a href="articuno.html">Articuno</a><a href="zapdos.html">Zapdos</a><a href="moltres.html">Moltres</a>
+          <div class="ndm-divider"></div>
+          <a href="mewtwo.html">Mewtwo ★</a><a href="mew.html">Mew ★</a>
+        </div>
+      </div>
+
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Fan Favourites ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Most Popular</div>
+          <a href="pikachu.html">Pikachu ⚡</a><a href="eevee.html">Eevee</a><a href="gengar.html">Gengar</a>
+          <a href="snorlax.html">Snorlax</a><a href="gyarados.html">Gyarados</a><a href="dragonite.html">Dragonite</a>
+          <div class="ndm-divider"></div>
+          <div class="ndm-heading">Eeveelutions</div>
+          <a href="vaporeon.html">Vaporeon</a><a href="jolteon.html">Jolteon</a><a href="flareon.html">Flareon</a>
+        </div>
+      </div>
     </div>
     <div class="nav-search">
       <input type="text" placeholder="Go to Pokémon…" onkeydown="handleNavSearch(event,this.value)">
@@ -331,7 +365,7 @@ function renderCards(){
 
 function cardHTML(c,idx){
   const m=NOTABLE[c.id]||{},notable=m.notable||false,note=m.note||'';
-  const img=c.images?.small||'',price=gp(c);
+  const img=c.images?.large||c.images?.small||'',price=gp(c);
   const badges=badgesFor(c).map(([cl,l])=>`<span class="badge ${cl}">${l}</span>`).join('');
   const {buy,psa,ebay}=lk(c);
   const sid=(c.id||'').replace(/[^a-zA-Z0-9]/g,'_');
@@ -341,7 +375,7 @@ function cardHTML(c,idx){
   cs[sid]=c;
   return`<div class="pcard${notable?' notable':''}" style="animation-delay:${delay}ms" onclick="openModal('${sid}')">
     <div class="pcard-img-wrap">
-      ${img?`<img src="${img}" alt="${c.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:``}
+      ${img?`<img src="${img}" alt="${c.name}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:``}
       <div class="img-placeholder"${img?' style="display:none"':''}>?</div>
       ${notable?'<div class="notable-ribbon">★ Notable</div>':''}
       <div class="year-tag">${yr}</div>
@@ -420,7 +454,7 @@ function buildHero(p){
   document.getElementById('poke-hero').innerHTML=`
     <div class="poke-hero-inner">
       <div class="poke-hero-sprite">
-        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png" alt="${p.name}" onerror="this.style.display='none'">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png" alt="${p.name}" decoding="async" onerror="this.style.display='none'">
       </div>
       <div class="poke-hero-text">
         <div class="hero-eyebrow">Kanto TCG · Collector's Guide</div>
