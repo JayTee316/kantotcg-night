@@ -363,13 +363,16 @@ function lk(c){
 let ALL=[],activeEra='all',activeLang='en',curSlug='ninetales',curPoke=null;
 const cs={};
 
-/* Language sets per language code in the TCG API */
+/* ── DUAL API: pokemontcg.io (EN) + tcgdex.net (JP/CN/ALL) ── */
 const LANG_MAP = {
-  'en':   { label:'English',  note:'Official English prints from all TCG sets.' },
-  'ja':   { label:'Japanese', note:'Japanese prints including Japan-exclusive promos like Ancient Mew.' },
-  'zh-TW':{ label:'Chinese',  note:'Traditional Chinese prints. May have limited pricing data.' },
-  'all':  { label:'All Languages', note:'All available language prints combined.' },
+  'en':   { label:'English',  note:'English prints — live TCGPlayer prices included.' },
+  'ja':   { label:'Japanese', note:'Japanese prints via TCGdex — includes Japan-exclusive promos like Ancient Mew.' },
+  'zh-TW':{ label:'Chinese',  note:'Traditional Chinese prints via TCGdex.' },
+  'all':  { label:'All Languages', note:'All prints combined — EN prices shown where available.' },
 };
+
+/* TCGdex language codes */
+const TCGDEX_LANG = { 'ja': 'ja', 'zh-TW': 'zh-TW' };
 
 function setLang(lang, btn) {
   activeLang = lang;
@@ -377,8 +380,65 @@ function setLang(lang, btn) {
   if (btn) btn.classList.add('active');
   const note = document.getElementById('lang-note');
   if (note) note.textContent = LANG_MAP[lang]?.note || '';
-  // Re-fetch with new language
   if (curPoke) fetchCards(curPoke.name);
+}
+
+/* Fetch all EN cards from pokemontcg.io */
+async function fetchEN(name) {
+  const enc = encodeURIComponent(`name:"${name}"`);
+  const r1 = await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
+  if (!r1.ok) throw new Error(r1.status);
+  const j1 = await r1.json();
+  let cards = j1.data || [];
+  const total = j1.totalCount || cards.length;
+  if (total > 250) {
+    const pages = Math.ceil(total / 250);
+    for (let p = 2; p <= pages; p++) {
+      const rp = await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
+      const jp = await rp.json();
+      cards = cards.concat(jp.data || []);
+    }
+  }
+  cards.forEach(c => { c._lang = 'en'; c._source = 'pokemontcg'; });
+  return cards;
+}
+
+/* Fetch JP or CN cards from TCGdex — uses Pokédex number to find all prints */
+async function fetchTCGdex(pokeId, langCode) {
+  try {
+    // Search by nationalPokedexNumber using TCGdex REST API
+    const url = `https://api.tcgdex.net/v2/${langCode}/cards?nationalPokedexNumber=${pokeId}&pagination[pageSize]=200`;
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const data = await r.json();
+    const raw = Array.isArray(data) ? data : (data.data || []);
+    // Normalise TCGdex card shape to match our display format
+    return raw.map(c => ({
+      id:       `tcgdex-${langCode}-${c.id || c.localId}`,
+      name:     c.name || '',
+      number:   c.localId || '',
+      rarity:   c.rarity || '',
+      artist:   c.illustrator || '',
+      hp:       c.hp ? String(c.hp) : null,
+      subtypes: c.stage ? [c.stage] : [],
+      images:   {
+        small: c.image ? c.image + '/low.webp' : '',
+        large: c.image ? c.image + '/high.webp' : '',
+      },
+      set: {
+        name:        c.set?.name || '',
+        series:      c.set?.serie?.name || '',
+        id:          c.set?.id || '',
+        releaseDate: c.set?.releaseDate || '',
+      },
+      tcgplayer: null, // no TCGPlayer data for non-EN
+      _lang:    langCode,
+      _source:  'tcgdex',
+    }));
+  } catch(e) {
+    console.warn(`TCGdex ${langCode} fetch failed:`, e);
+    return [];
+  }
 }
 
 /* File check */
@@ -396,75 +456,38 @@ function showFileErr(){
   document.getElementById('count-chip').textContent='— cards';
 }
 
-/* Fetch — with language support */
-async function fetchPage(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(r.status);
-  return r.json();
-}
+/* Fetch — dual API: pokemontcg.io for EN, tcgdex.net for JP/CN */
+async function fetchCards(name) {
+  if (isFile()) { showFileErr(); buildBuy(); return; }
+  document.getElementById('card-area').innerHTML =
+    `<div class="status-block"><div class="spinner"></div><br>Loading <strong>${name}</strong> cards…</div>`;
 
-async function fetchCards(name){
-  if(isFile()){showFileErr();buildBuy();return;}
-  document.getElementById('card-area').innerHTML=`<div class="status-block"><div class="spinner"></div><br>Loading <strong>${name}</strong> cards…</div>`;
-
-  // Decide which languages to fetch
-  const langs = activeLang === 'all' ? ['en','ja','zh-TW'] : [activeLang];
   let cards = [];
-
   try {
-    for (const lang of langs) {
-      // Query: name match + language filter
-      // For English: exact name match to avoid noise
-      // For JP/CN: broader search since names differ — search by nationalPokedexNumbers instead if available,
-      // otherwise use a loose name search and filter by language
-      let langCards = [];
-
-      if (lang === 'en') {
-        // Exact English name
-        const enc = encodeURIComponent(`name:"${name}"`);
-        const j1 = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
-        langCards = j1.data || [];
-        const total = j1.totalCount || langCards.length;
-        if (total > 250) {
-          const pages = Math.ceil(total / 250);
-          for (let p = 2; p <= pages; p++) {
-            const jp = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
-            langCards = langCards.concat(jp.data || []);
-          }
-        }
-      } else {
-        // For non-English: search by name loosely + filter by set.ptcgoCode or language field
-        // The TCG API v2 has a 'language' field we can query
-        const enc = encodeURIComponent(`name:"${name}" language:${lang}`);
-        try {
-          const j1 = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
-          langCards = j1.data || [];
-          const total = j1.totalCount || langCards.length;
-          if (total > 250) {
-            const pages = Math.ceil(total / 250);
-            for (let p = 2; p <= pages; p++) {
-              const jp = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
-              langCards = langCards.concat(jp.data || []);
-            }
-          }
-        } catch(le) {
-          console.warn(`Language ${lang} fetch failed:`, le);
-        }
-      }
-
-      // Tag cards with their language for display
-      langCards.forEach(c => { if (!c._lang) c._lang = lang; });
-      cards = cards.concat(langCards);
+    if (activeLang === 'en') {
+      cards = await fetchEN(name);
+    } else if (activeLang === 'all') {
+      // Fetch English + JP + CN in parallel
+      const [en, ja, zhTW] = await Promise.all([
+        fetchEN(name),
+        fetchTCGdex(curPoke.id, 'ja'),
+        fetchTCGdex(curPoke.id, 'zh-TW'),
+      ]);
+      cards = [...en, ...ja, ...zhTW];
+    } else {
+      // JP or CN via TCGdex
+      cards = await fetchTCGdex(curPoke.id, activeLang);
     }
 
-    // Deduplicate by card id
+    // Deduplicate
     const seen = new Set();
     cards = cards.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
 
   } catch(e) {
-    console.warn('API error:', e);
+    console.warn('Fetch error:', e);
     if (!cards.length) {
-      document.getElementById('card-area').innerHTML = `<div class="status-block">Connection error. Check your internet and reload.</div>`;
+      document.getElementById('card-area').innerHTML =
+        `<div class="status-block">Connection error — check your internet and reload.</div>`;
       buildBuy(); return;
     }
   }
