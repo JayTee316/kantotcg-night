@@ -165,7 +165,7 @@ body {
 /* ── ACTION BUTTONS ── */
 .action-btn {
   font-family: var(--sans); font-size: 10px; font-weight: 800;
-  padding: 6px 12px; border-radius: var(--r-sm);
+  padding: 6px 9px; border-radius: var(--r-sm);
   text-decoration: none; cursor: pointer;
   display: inline-flex; align-items: center; gap: 4px;
   white-space: nowrap; letter-spacing: 0.4px;
@@ -247,8 +247,8 @@ body {
 .price-none  { font-size: 11px; color: var(--muted2); font-style: italic; }
 .pcard-actions {
   border-top: 1px solid var(--border);
-  padding: 9px 13px; display: flex; gap: 5px; flex-wrap: wrap; margin-top: auto;
-  background: var(--bg2);
+  padding: 8px 10px; display: flex; gap: 4px; flex-wrap: nowrap; margin-top: auto;
+  background: var(--bg2); align-items: center;
 }
 
 /* ── MODAL ── */
@@ -386,7 +386,16 @@ body {
     0deg, transparent, transparent 2px,
     rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
   );
-  image-rendering: pixelated;
+}
+/* Preserve photo quality — only pixel-render decorative elements, not card images */
+[data-theme="gb"] .pcard-img-wrap img,
+[data-theme="gb"] .modal-img img,
+[data-theme="gb"] .poke-hero-sprite img,
+[data-theme="gb"] .notable-img img,
+[data-theme="gb"] .search-result-img img,
+[data-theme="gb"] .nav-sd-item img {
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 /* GB — nav */

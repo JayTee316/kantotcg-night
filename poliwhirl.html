@@ -404,34 +404,53 @@ async function fetchEN(name) {
 }
 
 /* Fetch JP or CN cards from TCGdex — uses Pokédex number to find all prints */
-async function fetchTCGdex(pokeId, langCode) {
+/* TCGdex: search by Pokémon name (works for JP/CN translated names too via the name= filter)
+   API format: https://api.tcgdex.net/v2/{lang}/cards?name=eq:{EnglishName}
+   TCGdex handles name translation internally — querying English name returns correct JP/CN results */
+async function fetchTCGdex(pokeName, langCode) {
   try {
-    // Search by nationalPokedexNumber using TCGdex REST API
-    const url = `https://api.tcgdex.net/v2/${langCode}/cards?nationalPokedexNumber=${pokeId}&pagination[pageSize]=200`;
-    const r = await fetch(url);
+    const enc = encodeURIComponent(pokeName);
+    // TCGdex uses ?name=eq: for exact match, returns cards in the requested language
+    const url = `https://api.tcgdex.net/v2/${langCode}/cards?name=eq:${enc}`;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(t);
     if (!r.ok) return [];
-    const data = await r.json();
-    const raw = Array.isArray(data) ? data : (data.data || []);
-    // Normalise TCGdex card shape to match our display format
-    return raw.map(c => ({
-      id:       `tcgdex-${langCode}-${c.id || c.localId}`,
+    const raw = await r.json();
+    const cards = Array.isArray(raw) ? raw : [];
+    if (!cards.length) return [];
+    // TCGdex brief cards only have id/name/image — fetch full details for first 60 in parallel
+    // (full details give us rarity, set info, artist etc.)
+    const toFetch = cards.slice(0, 80);
+    const detailed = await Promise.all(
+      toFetch.map(async c => {
+        try {
+          const dr = await fetch(`https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`, { signal: AbortSignal.timeout(6000) });
+          if (!dr.ok) return c;
+          return await dr.json();
+        } catch { return c; }
+      })
+    );
+    return detailed.map(c => ({
+      id:       `tcgdex-${langCode}-${c.id}`,
       name:     c.name || '',
       number:   c.localId || '',
       rarity:   c.rarity || '',
       artist:   c.illustrator || '',
       hp:       c.hp ? String(c.hp) : null,
       subtypes: c.stage ? [c.stage] : [],
-      images:   {
+      images: {
         small: c.image ? c.image + '/low.webp' : '',
         large: c.image ? c.image + '/high.webp' : '',
       },
       set: {
         name:        c.set?.name || '',
-        series:      c.set?.serie?.name || '',
+        series:      c.set?.serie?.name || c.set?.serie || '',
         id:          c.set?.id || '',
         releaseDate: c.set?.releaseDate || '',
       },
-      tcgplayer: null, // no TCGPlayer data for non-EN
+      tcgplayer: null,
       _lang:    langCode,
       _source:  'tcgdex',
     }));
@@ -459,27 +478,31 @@ function showFileErr(){
 /* Fetch — dual API: pokemontcg.io for EN, tcgdex.net for JP/CN */
 async function fetchCards(name) {
   if (isFile()) { showFileErr(); buildBuy(); return; }
+
+  const langLabel = {'en':'English','ja':'Japanese','zh-TW':'Chinese','all':'All Languages'}[activeLang] || activeLang;
   document.getElementById('card-area').innerHTML =
-    `<div class="status-block"><div class="spinner"></div><br>Loading <strong>${name}</strong> cards…</div>`;
+    `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> — ${langLabel}…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">New set cards appear automatically</span></div>`;
 
   let cards = [];
   try {
     if (activeLang === 'en') {
       cards = await fetchEN(name);
     } else if (activeLang === 'all') {
-      // Fetch English + JP + CN in parallel
+      // Parallel fetch all three — fastest possible
+      document.getElementById('card-area').innerHTML =
+        `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> in all languages…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">EN from TCGPlayer · JP + CN from TCGdex</span></div>`;
       const [en, ja, zhTW] = await Promise.all([
         fetchEN(name),
-        fetchTCGdex(curPoke.id, 'ja'),
-        fetchTCGdex(curPoke.id, 'zh-TW'),
+        fetchTCGdex(name, 'ja'),
+        fetchTCGdex(name, 'zh-TW'),
       ]);
       cards = [...en, ...ja, ...zhTW];
     } else {
-      // JP or CN via TCGdex
-      cards = await fetchTCGdex(curPoke.id, activeLang);
+      // JP or CN via TCGdex — pass English name, TCGdex handles translation lookup
+      cards = await fetchTCGdex(name, activeLang);
     }
 
-    // Deduplicate
+    // Deduplicate by id
     const seen = new Set();
     cards = cards.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
 
