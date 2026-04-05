@@ -47,6 +47,38 @@
   .hstat-val.green { color: var(--lg-green); }
   .hstat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted2); margin-top: 2px; }
 
+
+  /* ── SEARCH DROPDOWN ── */
+  .search-wrap { position: relative; flex: 1; max-width: 300px; }
+  .search-dropdown {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-top: 2px solid var(--fr-red);
+    max-height: 380px; overflow-y: auto; z-index: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
+  }
+  .search-dropdown.open { display: block; }
+  .search-result {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 14px; text-decoration: none; color: var(--text);
+    transition: background 0.1s; cursor: pointer; border: none; width: 100%;
+    background: none; text-align: left; font-family: var(--sans);
+  }
+  .search-result:hover, .search-result.focused {
+    background: var(--surface3); color: var(--fr-red);
+  }
+  .search-result-img { width: 44px; height: 44px; flex-shrink: 0; }
+  .search-result-img img { width: 100%; height: 100%; object-fit: contain; }
+  .search-result-num { font-size: 9px; font-weight: 700; color: var(--muted2); }
+  .search-result-name { font-family: var(--display); font-size: 15px; font-weight: 800; color: inherit; line-height: 1.2; letter-spacing: 0.2px; }
+  .search-result-types { display: flex; gap: 3px; margin-top: 2px; }
+  .search-no-results { padding: 16px 14px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .search-wrap .filter-search { width: 100%; }
+  @media (max-width: 700px) {
+    .search-wrap { max-width: none; flex: 1; }
+    .search-dropdown { position: fixed; top: auto; left: 14px; right: 14px; width: auto; }
+  }
   /* ── FILTER BAR ── */
   .filter-bar {
     position: sticky; top: 52px; z-index: 100; background: var(--bg);
@@ -202,9 +234,7 @@
       <a class="nav-link" href="mewtwo.html">Mewtwo</a>
       <a class="nav-link" href="mew.html">Mew</a>
     </div>
-    <div class="nav-search">
-      <input type="text" placeholder="Search Pokémon…" oninput="handleSearch(this.value)">
-    </div>
+
   </div>
 </nav>
 
@@ -557,7 +587,16 @@
       <option value="Flying">Flying</option>
       <option value="Dragon">Dragon</option>
     </select>
-    <input type="text" class="filter-search" id="search-box" placeholder="Search Pokémon by name or #…" oninput="handleSearch(this.value)">
+    <!-- Search with live dropdown -->
+    <div class="search-wrap" id="search-wrap">
+      <input type="text" class="filter-search" id="search-box"
+             placeholder="Search Pokémon by name or #…"
+             oninput="handleSearchInput(this.value)"
+             onfocus="handleSearchInput(this.value)"
+             onkeydown="handleSearchKey(event)"
+             autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
     <span class="count-chip" id="count-chip">151 Pokémon</span>
   </div>
 </div>
@@ -688,7 +727,103 @@ function pokeCardHTML(p,i) {
 }
 
 function filterType(val){activeType=val;renderList();}
-function handleSearch(val){searchQuery=val.trim();renderList();}
+
+/* ── LIVE SEARCH DROPDOWN ── */
+let searchFocusIdx = -1;
+
+function spriteURL_small(id) {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+}
+
+function handleSearchInput(val) {
+  const q = val.trim().toLowerCase();
+  const dd = document.getElementById('search-dropdown');
+  searchQuery = val.trim();
+
+  if (!q) {
+    dd.classList.remove('open');
+    dd.innerHTML = '';
+    searchFocusIdx = -1;
+    renderList();
+    return;
+  }
+
+  // Filter matching pokemon
+  const matches = KANTO_POKEMON.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    String(p.id).padStart(3,'0').includes(q) ||
+    p.slug.includes(q.replace(/\s/g,'-'))
+  ).slice(0, 12); // max 12 results
+
+  searchFocusIdx = -1;
+
+  if (!matches.length) {
+    dd.innerHTML = '<div class="search-no-results">No Pokémon found</div>';
+    dd.classList.add('open');
+    renderList();
+    return;
+  }
+
+  dd.innerHTML = matches.map((p, i) =>
+    `<a class="search-result" href="${p.slug}.html" data-idx="${i}">
+      <div class="search-result-img">
+        <img src="${spriteURL_small(p.id)}" alt="${p.name}" loading="lazy">
+      </div>
+      <div>
+        <div class="search-result-num">#${String(p.id).padStart(3,'0')}</div>
+        <div class="search-result-name">${highlightMatch(p.name, q)}</div>
+        <div class="search-result-types">
+          <span class="type-tag ${TYPE_CLASSES[p.type1]||'tt-normal'}">${p.type1}</span>
+          ${p.type2 ? `<span class="type-tag ${TYPE_CLASSES[p.type2]||'tt-normal'}">${p.type2}</span>` : ''}
+        </div>
+      </div>
+    </a>`
+  ).join('');
+
+  dd.classList.add('open');
+  renderList();
+}
+
+function highlightMatch(name, q) {
+  const idx = name.toLowerCase().indexOf(q);
+  if (idx === -1) return name;
+  return name.slice(0,idx) +
+    `<strong style="color:var(--fr-red)">${name.slice(idx, idx+q.length)}</strong>` +
+    name.slice(idx+q.length);
+}
+
+function handleSearchKey(e) {
+  const dd = document.getElementById('search-dropdown');
+  const items = dd.querySelectorAll('.search-result');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    searchFocusIdx = Math.min(searchFocusIdx + 1, items.length - 1);
+    items.forEach((el,i) => el.classList.toggle('focused', i === searchFocusIdx));
+    items[searchFocusIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    searchFocusIdx = Math.max(searchFocusIdx - 1, 0);
+    items.forEach((el,i) => el.classList.toggle('focused', i === searchFocusIdx));
+    items[searchFocusIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter') {
+    if (searchFocusIdx >= 0 && items[searchFocusIdx]) {
+      window.location.href = items[searchFocusIdx].getAttribute('href');
+    } else if (items.length === 1) {
+      window.location.href = items[0].getAttribute('href');
+    }
+  } else if (e.key === 'Escape') {
+    document.getElementById('search-dropdown').classList.remove('open');
+    document.getElementById('search-box').blur();
+  }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('search-wrap').contains(e.target)) {
+    document.getElementById('search-dropdown').classList.remove('open');
+  }
+});
 
 if(window.location.protocol==='file:'){
   const w=document.createElement('div');
