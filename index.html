@@ -3,261 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kanto TCG — The Original 151 Pokémon Card Guide</title>
+<title>Kanto TCG — Generation I Card Database</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  /* ── HERO ── */
+
+  /* ── BATTLE ARENA ── */
+  .battle-arena {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 48%; max-width: 540px; pointer-events: none;
+    display: flex; align-items: center; justify-content: flex-end;
+    opacity: 0.85;
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,1) 35%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,1) 35%);
+  }
+  .battle-arena svg { width: 100%; height: auto; }
+  @media (max-width: 860px) { .battle-arena { display: none; } }
   .hero {
     position: relative; overflow: hidden;
-    min-height: 540px; display: flex; align-items: center;
-    padding: 80px 40px 60px;
-    border-bottom: 3px solid var(--border);
+    min-height: 460px; display: flex; align-items: center;
+    padding: 72px 40px 56px; border-bottom: 1px solid var(--border);
   }
-  /* Warm FRLG gradient — orange to leaf green */
   .hero::before {
     content: ''; position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 65% 100% at 20% 60%, rgba(232,48,16,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 55% 80% at 80% 40%, rgba(40,184,56,0.07) 0%, transparent 55%),
-      linear-gradient(150deg, #080810 0%, #0d0e18 50%, #080810 100%);
-  }
-  /* Pokéball halves decoration */
-  .hero-deco {
-    position: absolute; right: -60px; top: 50%;
-    transform: translateY(-50%);
-    width: 420px; height: 420px; border-radius: 50%;
-    border: 6px solid rgba(232,48,16,0.08);
-    pointer-events: none;
-  }
-  .hero-deco::before {
-    content: ''; position: absolute; inset: -6px;
-    border-radius: 50%; border: 6px solid rgba(40,184,56,0.07);
-  }
-  .hero-deco::after {
-    content: ''; position: absolute;
-    left: -6px; right: -6px; top: 50%; height: 4px;
-    background: rgba(128,132,148,0.05);
+      radial-gradient(ellipse 55% 90% at 15% 55%, rgba(232,48,16,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 45% 70% at 85% 40%, rgba(40,184,56,0.04) 0%, transparent 55%);
   }
   .hero-inner { max-width: 1280px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
-
   .hero-eyebrow {
-    font-size: 11px; font-weight: 900; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
   }
-  .hero-eyebrow::before { content: ''; width: 28px; height: 2px; background: var(--fr-red); border-radius: 1px; display: inline-block; }
-
+  .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--fr-red); display: inline-block; }
   .hero h1 {
-    font-family: var(--display);
-    font-size: clamp(36px, 6vw, 72px);
-    line-height: 1.05; margin-bottom: 8px;
-    color: var(--text);
+    font-family: var(--display); font-weight: 900; font-size: clamp(36px, 5.5vw, 70px);
+    line-height: 1.0; margin-bottom: 8px; color: var(--text); letter-spacing: 1px;
   }
-  .hero h1 .fr { color: var(--fr-red); }
-  .hero h1 .lg { color: var(--lg-green); }
-
-  .hero-subtitle {
-    font-family: var(--display); font-size: clamp(16px, 2.5vw, 22px);
-    color: var(--muted); margin-bottom: 20px; font-weight: 400;
+  .hero h1 .accent-red { color: var(--fr-red); }
+  .hero-sub {
+    font-family: var(--display); font-size: clamp(13px, 2vw, 17px); font-weight: 600;
+    color: var(--muted); margin-bottom: 16px; letter-spacing: 0.4px;
   }
   .hero-desc {
-    font-size: 16px; color: var(--text2); max-width: 520px;
-    margin-bottom: 32px; font-weight: 600; line-height: 1.7;
+    font-size: 14px; color: var(--text2); max-width: 500px;
+    margin-bottom: 28px; line-height: 1.75; font-weight: 500;
   }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+  .site-btn {
+    font-family: var(--sans); font-size: 12px; font-weight: 800;
+    padding: 9px 18px; border-radius: var(--r-sm); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    border: 1px solid transparent; transition: all 0.12s;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .site-btn.primary { background: var(--fr-red); color: #fff; border-color: var(--fr-red-dark); }
+  .site-btn.primary:hover { background: var(--fr-red-light); }
+  .site-btn.ghost { background: transparent; color: var(--text2); border-color: var(--border2); }
+  .site-btn.ghost:hover { border-color: var(--fr-red); color: var(--fr-red); }
+  .hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+  .hstat-val { font-family: var(--display); font-size: 22px; font-weight: 900; color: var(--fr-red); line-height: 1; }
+  .hstat-val.green { color: var(--lg-green); }
+  .hstat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted2); margin-top: 2px; }
 
-  /* FRLG-style button */
-  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
-  .frlg-btn {
-    font-family: var(--display); font-size: 14px;
-    padding: 12px 24px; border-radius: var(--r-xl);
-    text-decoration: none; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 8px;
-    white-space: nowrap; border: none;
-    transition: all 0.15s;
-    font-weight: 400;
+  /* FILTER BAR */
+  .filter-bar {
+    position: sticky; top: 52px; z-index: 100; background: var(--bg);
+    border-bottom: 1px solid var(--border); padding: 0 40px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.5);
   }
-  .frlg-btn.primary {
-    background: var(--fr-red); color: var(--text);
-    box-shadow: 0 3px 0 var(--fr-red-dark), 0 6px 20px rgba(232,48,16,0.3);
-  }
-  .frlg-btn.primary:hover { background: var(--fr-red-light); transform: translateY(-2px); box-shadow: 0 5px 0 var(--fr-red-dark), 0 10px 28px rgba(232,48,16,0.35); }
-  .frlg-btn.secondary {
-    background: var(--lg-green); color: var(--text);
-    box-shadow: 0 3px 0 var(--lg-green-dk), 0 6px 20px rgba(48,168,64,0.25);
-  }
-  .frlg-btn.secondary:hover { background: var(--lg-green-lt); transform: translateY(-2px); }
-  .frlg-btn.outline {
-    background: var(--bg); color: var(--text2);
-    border: 2px solid var(--border); box-shadow: 0 3px 0 var(--border2);
-  }
-  .frlg-btn.outline:hover { border-color: var(--fr-red); color: var(--fr-red); }
-
-  /* FRLG info boxes */
-  .hero-info-boxes { display: flex; gap: 16px; flex-wrap: wrap; }
-  .info-box {
-    background: var(--bg); border: 2px solid var(--border);
-    border-radius: var(--r-lg); padding: 16px 20px;
-    box-shadow: 0 3px 0 var(--border2), 0 4px 12px var(--shadow);
-    min-width: 110px; text-align: center;
-  }
-  .info-box-val { font-family: var(--display); font-size: 26px; color: var(--fr-red); line-height: 1; margin-bottom: 4px; }
-  .info-box-val.green { color: var(--lg-green); }
-  .info-box-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
-
-  /* ── CONTROLS ── */
-  .controls {
-    position: sticky; top: 56px; z-index: 100;
-    background: var(--bg);
-    border-bottom: 3px solid var(--border);
-    box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-    padding: 0 40px;
-  }
-  .controls-inner {
+  .filter-bar-inner {
     max-width: 1280px; margin: 0 auto;
-    display: flex; align-items: center; overflow-x: auto; scrollbar-width: none;
+    display: flex; align-items: center; gap: 10px; height: 50px;
   }
-  .controls-inner::-webkit-scrollbar { display: none; }
-  .type-tab {
-    padding: 14px 16px; font-size: 12px; font-weight: 800;
-    color: var(--muted); border: none; background: none; cursor: pointer;
-    white-space: nowrap; border-bottom: 3px solid transparent;
-    transition: color 0.15s, border-color 0.15s; letter-spacing: 0.3px;
-    text-transform: uppercase;
+  .type-dropdown-btn {
+    background: var(--surface); border: 1px solid var(--border2);
+    color: var(--text); font-family: var(--sans); font-size: 12px; font-weight: 700;
+    padding: 7px 30px 7px 11px; border-radius: var(--r-sm); cursor: pointer; outline: none;
+    text-transform: uppercase; letter-spacing: 0.3px; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(192,194,208,0.7)' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+    min-width: 140px; transition: border-color 0.15s;
   }
-  .type-tab:hover { color: var(--text); }
-  .type-tab.active { color: var(--fr-red); border-bottom-color: var(--fr-red); }
-  .ctrl-right { margin-left: auto; display: flex; align-items: center; gap: 12px; padding: 10px 0 10px 20px; flex-shrink: 0; }
-  .count-chip { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
-  input#search-box {
-    background: var(--bg); border: 2px solid var(--border);
-    color: var(--text); font-family: var(--sans); font-size: 13px; font-weight: 600;
-    padding: 7px 14px; border-radius: 20px; width: 180px; outline: none;
-    transition: border-color 0.2s;
+  .type-dropdown-btn:focus { border-color: var(--fr-red); }
+  .type-dropdown-btn option { background: var(--surface2); color: var(--text); }
+  .filter-search {
+    background: var(--surface); border: 1px solid var(--border2);
+    color: var(--text); font-family: var(--sans); font-size: 12px; font-weight: 500;
+    padding: 7px 11px 7px 30px; border-radius: var(--r-sm); outline: none;
+    transition: border-color 0.15s; flex: 1; max-width: 280px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(80,82,101,0.9)' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 9px center;
   }
-  input#search-box:focus { border-color: var(--fr-red); }
-  input#search-box::placeholder { color: var(--muted2); }
+  .filter-search:focus { border-color: var(--fr-red); }
+  .filter-search::placeholder { color: var(--muted2); }
+  .count-chip { font-size: 11px; font-weight: 700; color: var(--muted2); white-space: nowrap; margin-left: auto; }
 
-  /* ── MAIN ── */
-  main { max-width: 1280px; margin: 0 auto; padding: 40px 40px 80px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 36px 40px 80px; }
 
-  /* ── STARTERS ── */
-  .starters-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 48px; }
-  .starter-card {
-    display: flex; gap: 18px; align-items: center;
-    background: var(--bg); border: 2px solid var(--border);
-    border-radius: var(--r-xl);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    padding: 18px 22px; text-decoration: none; color: var(--text);
-    transition: transform 0.15s, box-shadow 0.15s;
+  /* NOTABLE CARDS */
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .sec-head h2 { font-family: var(--display); font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: 0.5px; }
+  .sec-head span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .notable-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-bottom: 36px; }
+  .notable-card {
+    display: flex; gap: 14px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--nc-color, var(--fr-red));
+    border-radius: var(--r-lg); padding: 14px 16px;
+    text-decoration: none; color: var(--text);
+    transition: border-color 0.15s, background 0.15s;
   }
-  .starter-card:hover { transform: translateY(-4px); box-shadow: 0 7px 0 var(--border2), 0 14px 36px var(--shadow); }
-  .starter-card.fire { border-color: rgba(240,128,48,.18); }
-  .starter-card.water { border-color: rgba(104,144,240,.18); }
-  .starter-card.grass { border-color: rgba(120,200,80,.18); }
-  .starter-img { width: 80px; height: 80px; flex-shrink: 0; }
-  .starter-img img { width: 100%; height: 100%; object-fit: contain; }
-  .starter-chip { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
-  .starter-name { font-family: var(--display); font-size: 20px; color: var(--text); margin-bottom: 4px; }
-  .starter-desc { font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.5; }
+  .notable-card:hover { background: var(--surface2); }
+  .notable-rank { font-family: var(--display); font-size: 28px; font-weight: 900; color: var(--nc-color, var(--fr-red)); opacity: 0.2; flex-shrink: 0; min-width: 36px; line-height: 1; }
+  .notable-img { width: 56px; height: 56px; flex-shrink: 0; }
+  .notable-img img { width: 100%; height: 100%; object-fit: contain; image-rendering: -webkit-optimize-contrast; }
+  .notable-chip { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--nc-color, var(--fr-red)); margin-bottom: 2px; }
+  .notable-name { font-family: var(--display); font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 1px; letter-spacing: 0.3px; }
+  .notable-desc { font-size: 10px; color: var(--muted); line-height: 1.5; font-weight: 500; }
 
-  /* ── SECTION HEADER ── */
-  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; }
-  .sec-head h2 { font-family: var(--display); font-size: 28px; color: var(--text); }
-  .sec-head span { font-size: 14px; color: var(--muted); font-weight: 700; }
+  /* LEGENDARY BANNER */
+  .legendary-banner {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 16px 22px; display: flex; align-items: center; gap: 16px;
+    margin-bottom: 36px; flex-wrap: wrap;
+  }
+  .leg-icon { font-size: 22px; flex-shrink: 0; }
+  .leg-text { flex: 1; min-width: 180px; }
+  .leg-title { font-family: var(--display); font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 2px; letter-spacing: 0.3px; }
+  .leg-desc { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .leg-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .leg-btn {
+    font-family: var(--sans); font-size: 11px; font-weight: 800;
+    padding: 6px 13px; border-radius: var(--r-sm); text-decoration: none;
+    border: 1px solid transparent; transition: all 0.12s;
+    letter-spacing: 0.3px; text-transform: uppercase; display: inline-block;
+  }
+  .leg-btn.articuno { background:rgba(104,144,240,0.12); color:#88aaff; border-color:rgba(104,144,240,0.28); }
+  .leg-btn.articuno:hover { background:rgba(104,144,240,0.24); }
+  .leg-btn.zapdos   { background:rgba(248,208,48,0.12);  color:#d8a820; border-color:rgba(248,208,48,0.28); }
+  .leg-btn.zapdos:hover { background:rgba(248,208,48,0.24); }
+  .leg-btn.moltres  { background:rgba(240,128,48,0.12);  color:#e08040; border-color:rgba(240,128,48,0.28); }
+  .leg-btn.moltres:hover { background:rgba(240,128,48,0.24); }
+  .leg-btn.mewtwo   { background:rgba(168,144,240,0.12); color:#b898f0; border-color:rgba(168,144,240,0.28); }
+  .leg-btn.mewtwo:hover { background:rgba(168,144,240,0.24); }
+  .leg-btn.mew      { background:rgba(248,88,176,0.12);  color:#e870b8; border-color:rgba(248,88,176,0.28); }
+  .leg-btn.mew:hover { background:rgba(248,88,176,0.24); }
 
-  /* ── POKEMON GRID ── */
-  .poke-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 12px; }
-
-  /* ── POKEMON CARD ── */
+  /* POKEMON GRID */
+  .poke-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
   .poke-card {
-    background: var(--bg); border: 2px solid var(--border);
-    border-radius: var(--r-xl);
-    box-shadow: none;
-    text-decoration: none; display: flex; flex-direction: column;
-    overflow: hidden; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); text-decoration: none; display: flex; flex-direction: column;
+    overflow: hidden; transition: border-color 0.15s, background 0.15s;
     animation: fadeUp 0.3s ease both;
   }
-  .poke-card:hover { transform: translateY(-4px); box-shadow: 0 7px 0 var(--border2), 0 12px 28px var(--shadow); }
-
+  .poke-card:hover { border-color: var(--border2); background: var(--surface2); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
   .poke-card-img {
-    background: var(--bg);
-    aspect-ratio: 1; overflow: hidden;
+    background: var(--bg2); aspect-ratio: 1; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
-    padding: 12px; border-bottom: 2px solid var(--border);
-    position: relative;
+    padding: 10px; border-bottom: 1px solid var(--border); position: relative;
   }
-  .poke-card-img img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s; }
-  .poke-card:hover .poke-card-img img { transform: scale(1.1); }
-  .poke-num {
-    position: absolute; bottom: 6px; right: 8px;
-    font-size: 10px; font-weight: 800; color: var(--muted2);
-    background: rgba(255,255,255,0.8); padding: 1px 6px; border-radius: 8px;
+  .poke-card-img img {
+    width:100%; height:100%; object-fit:contain; transition:transform 0.2s;
+    image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
   }
-  .poke-card-body { padding: 12px 12px 0; }
-  .poke-card-name { font-family: var(--display); font-size: 14px; color: var(--text); margin-bottom: 4px; }
-  .poke-card-types { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
-  .poke-card-desc {
-    font-size: 11px; color: var(--muted); font-weight: 600; line-height: 1.5;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .poke-card-footer {
-    border-top: 2px solid var(--border); padding: 8px 12px;
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg); margin-top: auto;
-  }
-  .poke-card-dex { font-size: 10px; font-weight: 800; color: var(--muted); }
-  .poke-card-arrow { font-size: 14px; font-weight: 900; color: var(--fr-red); transition: transform 0.15s; }
-  .poke-card:hover .poke-card-arrow { transform: translateX(3px); }
+  .poke-card:hover .poke-card-img img { transform: scale(1.08); }
+  .poke-num { position:absolute; bottom:4px; right:6px; font-size:9px; font-weight:700; color:var(--muted2); background:rgba(0,0,0,0.6); padding:1px 5px; border-radius:2px; }
+  .poke-card-body { padding:9px 10px 0; }
+  .poke-card-name { font-family:var(--display); font-size:14px; font-weight:800; color:var(--text); margin-bottom:3px; letter-spacing:0.2px; }
+  .poke-card-types { display:flex; gap:3px; flex-wrap:wrap; margin-bottom:4px; }
+  .poke-card-desc { font-size:10px; color:var(--muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:7px; }
+  .poke-card-footer { border-top:1px solid var(--border); padding:6px 10px; display:flex; align-items:center; justify-content:space-between; background:var(--bg2); margin-top:auto; }
+  .poke-card-dex { font-size:9px; font-weight:700; color:var(--muted2); }
+  .poke-card-arrow { font-size:12px; font-weight:900; color:var(--fr-red); }
+  .gen-section { margin-bottom:40px; }
+  .gen-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted2); margin-bottom:11px; display:flex; align-items:center; gap:10px; }
+  .gen-label::after { content:''; flex:1; height:1px; background:var(--border); }
 
-  /* ── GEN LABEL ── */
-  .gen-section { margin-bottom: 48px; }
-  .gen-label {
-    font-size: 11px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.7px; color: var(--muted); margin-bottom: 16px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .gen-label .dex-range { font-size: 10px; color: var(--muted2); font-weight: 700; }
-  .gen-label::after { content: ''; flex: 1; height: 2px; background: var(--border); border-radius: 1px; }
-
-  /* ── LEGENDARY BANNER ── */
-  .legendary-banner {
-    background: var(--bg);
-    border: 2px solid var(--border);
-    border-radius: var(--r-xl); padding: 20px 28px;
-    display: flex; align-items: center; gap: 20px;
-    margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .legendary-banner-icon { font-size: 32px; flex-shrink: 0; }
-  .legendary-banner-title { font-family: var(--display); font-size: 18px; color: var(--text); margin-bottom: 2px; }
-  .legendary-banner-desc { font-size: 13px; color: var(--muted); font-weight: 600; }
-
-  @media (max-width: 700px) {
-    .hero { padding: 48px 20px 40px; min-height: auto; }
-    main { padding: 24px 20px 60px; }
-    .controls { padding: 0 16px; top: 56px; }
-    .hero-deco { display: none; }
+  @media (max-width:700px) {
+    .hero { padding:40px 18px 34px; min-height:auto; }
+    main { padding:22px 16px 56px; }
+    .filter-bar { padding:0 14px; }
+    .filter-search { max-width:none; flex:1; }
+    .notable-grid { grid-template-columns:1fr; }
+    .legendary-banner { flex-direction:column; align-items:flex-start; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="site-nav">
   <div class="site-nav-inner">
     <a class="nav-logo" href="index.html">
       <span class="nav-logo-icon">⬟</span>
-      <span class="fr">FIRE</span><span class="lg">RED</span>&nbsp;TCG
+      <span class="fr">KANTO</span>&nbsp;<span class="lg">TCG</span>
     </a>
     <div class="nav-links">
       <a class="nav-link active" href="index.html">Home</a>
       <a class="nav-link" href="#pokemon-section">Pokédex</a>
-      <a class="nav-link" href="charizard.html">Charizard</a>
-      <a class="nav-link" href="blastoise.html">Blastoise</a>
-      <a class="nav-link" href="mewtwo.html">Mewtwo</a>
-      <a class="nav-link" href="pikachu.html">Pikachu</a>
-      <a class="nav-link" href="mew.html">Mew</a>
+
+      <!-- Starters dropdown -->
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Starters ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Starter Pokémon</div>
+          <a href="bulbasaur.html">Bulbasaur</a>
+          <a href="ivysaur.html">Ivysaur</a>
+          <a href="venusaur.html">Venusaur</a>
+          <div class="ndm-divider"></div>
+          <a href="charmander.html">Charmander</a>
+          <a href="charmeleon.html">Charmeleon</a>
+          <a href="charizard.html">Charizard ★</a>
+          <div class="ndm-divider"></div>
+          <a href="squirtle.html">Squirtle</a>
+          <a href="wartortle.html">Wartortle</a>
+          <a href="blastoise.html">Blastoise ★</a>
+        </div>
+      </div>
+
+      <!-- Legendaries dropdown -->
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Legendaries ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Legendary &amp; Mythical</div>
+          <a href="articuno.html">Articuno</a>
+          <a href="zapdos.html">Zapdos</a>
+          <a href="moltres.html">Moltres</a>
+          <div class="ndm-divider"></div>
+          <a href="mewtwo.html">Mewtwo ★</a>
+          <a href="mew.html">Mew ★</a>
+        </div>
+      </div>
+
+      <!-- Fan Faves dropdown -->
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Fan Favourites ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">Most Popular</div>
+          <a href="pikachu.html">Pikachu ⚡</a>
+          <a href="eevee.html">Eevee</a>
+          <a href="gengar.html">Gengar</a>
+          <a href="snorlax.html">Snorlax</a>
+          <a href="gyarados.html">Gyarados</a>
+          <a href="dragonite.html">Dragonite</a>
+          <div class="ndm-divider"></div>
+          <div class="ndm-heading">Eeveelutions</div>
+          <a href="vaporeon.html">Vaporeon</a>
+          <a href="jolteon.html">Jolteon</a>
+          <a href="flareon.html">Flareon</a>
+        </div>
+      </div>
+
+      <!-- Sets / Eras dropdown -->
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn">Card Eras ▾</button>
+        <div class="nav-dropdown-menu">
+          <div class="ndm-heading">WotC Era (1999–2003)</div>
+          <a href="charizard.html#WotC">Base Set Holos</a>
+          <a href="mewtwo.html#WotC">Neo Genesis</a>
+          <div class="ndm-divider"></div>
+          <div class="ndm-heading">Modern Era</div>
+          <a href="charizard.html#SV">Scarlet &amp; Violet</a>
+          <a href="charizard.html#SWSH">Sword &amp; Shield</a>
+          <a href="charizard.html#SM">Sun &amp; Moon</a>
+          <div class="ndm-divider"></div>
+          <div class="ndm-heading">Quick Jumps</div>
+          <a href="charizard.html">Charizard — All Cards</a>
+          <a href="pikachu.html">Pikachu — All Cards</a>
+        </div>
+      </div>
+
     </div>
     <div class="nav-search">
       <input type="text" placeholder="Search Pokémon…" oninput="handleSearch(this.value)">
@@ -265,86 +281,248 @@
   </div>
 </nav>
 
-<!-- HERO -->
 <header class="hero">
-  <div class="hero-deco"></div>
+  <!-- Gen 3 Battle Arena decoration -->
+  <div class="battle-arena" aria-hidden="true">
+    <svg viewBox="0 0 520 400" xmlns="http://www.w3.org/2000/svg" width="520" height="400">
+      <!-- Sky gradient -->
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0a0c18"/>
+          <stop offset="100%" stop-color="#151828"/>
+        </linearGradient>
+        <linearGradient id="ground1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1a2a0a"/>
+          <stop offset="100%" stop-color="#0f1808"/>
+        </linearGradient>
+        <linearGradient id="platform1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#304818"/>
+          <stop offset="100%" stop-color="#1e3010"/>
+        </linearGradient>
+        <linearGradient id="platform2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#282018"/>
+          <stop offset="100%" stop-color="#181008"/>
+        </linearGradient>
+        <radialGradient id="moonglow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(180,200,255,0.18)"/>
+          <stop offset="100%" stop-color="rgba(180,200,255,0)"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Sky -->
+      <rect width="520" height="400" fill="url(#sky)"/>
+
+      <!-- Moon -->
+      <circle cx="390" cy="70" r="38" fill="url(#moonglow)"/>
+      <circle cx="390" cy="70" r="26" fill="#1e2438" opacity="0.7"/>
+      <circle cx="390" cy="70" r="22" fill="none" stroke="rgba(180,200,255,0.25)" stroke-width="1.5"/>
+      <!-- Moon craters -->
+      <circle cx="382" cy="64" r="4" fill="rgba(0,0,0,0.3)"/>
+      <circle cx="396" cy="76" r="3" fill="rgba(0,0,0,0.25)"/>
+      <circle cx="386" cy="78" r="2" fill="rgba(0,0,0,0.2)"/>
+
+      <!-- Stars -->
+      <circle cx="48"  cy="28"  r="1.2" fill="rgba(255,255,255,0.7)"/>
+      <circle cx="120" cy="18"  r="1"   fill="rgba(255,255,255,0.6)"/>
+      <circle cx="198" cy="35"  r="1.4" fill="rgba(255,255,255,0.8)"/>
+      <circle cx="260" cy="12"  r="1"   fill="rgba(255,255,255,0.5)"/>
+      <circle cx="310" cy="42"  r="1.2" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="450" cy="22"  r="1"   fill="rgba(255,255,255,0.7)"/>
+      <circle cx="490" cy="55"  r="1.3" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="70"  cy="60"  r="0.9" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="160" cy="55"  r="1"   fill="rgba(255,255,255,0.6)"/>
+      <circle cx="440" cy="48"  r="0.9" fill="rgba(255,255,255,0.6)"/>
+
+      <!-- Distant mountains -->
+      <polygon points="0,200 60,130 120,180 180,110 240,160 300,90 360,145 420,105 480,150 520,120 520,240 0,240"
+               fill="#0d1520" opacity="0.9"/>
+      <polygon points="0,210 80,155 140,195 220,140 280,175 340,120 400,160 460,130 520,155 520,240 0,240"
+               fill="#111c28" opacity="0.7"/>
+
+      <!-- Ground base -->
+      <ellipse cx="260" cy="310" rx="340" ry="60" fill="#0e1a08" opacity="0.8"/>
+
+      <!-- Opponent platform (top right, elevated) -->
+      <ellipse cx="350" cy="220" rx="90" ry="22" fill="url(#platform1)"/>
+      <ellipse cx="350" cy="220" rx="90" ry="22" fill="none" stroke="rgba(80,160,40,0.35)" stroke-width="2"/>
+      <!-- Platform edge highlight -->
+      <ellipse cx="350" cy="218" rx="86" ry="18" fill="none" stroke="rgba(120,200,60,0.2)" stroke-width="1"/>
+      <!-- Opponent platform lines (battle arena markings) -->
+      <line x1="290" y1="220" x2="410" y2="220" stroke="rgba(100,180,50,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- Player platform (bottom left, closer) -->
+      <ellipse cx="150" cy="295" rx="110" ry="28" fill="url(#platform2)"/>
+      <ellipse cx="150" cy="295" rx="110" ry="28" fill="none" stroke="rgba(200,120,40,0.35)" stroke-width="2"/>
+      <ellipse cx="150" cy="293" rx="106" ry="24" fill="none" stroke="rgba(240,160,60,0.2)" stroke-width="1"/>
+      <line x1="78" y1="295" x2="222" y2="295" stroke="rgba(200,140,50,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- HP bars (opponent - top) -->
+      <rect x="20" y="20" width="160" height="42" rx="2" fill="#0d0e18" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="28" y="36" font-family="monospace" font-size="9" fill="rgba(200,202,216,0.9)" font-weight="bold">CHARIZARD</text>
+      <text x="154" y="36" font-family="monospace" font-size="8" fill="rgba(200,202,216,0.6)" text-anchor="end">Lv.50</text>
+      <text x="28" y="50" font-family="monospace" font-size="7" fill="rgba(120,130,148,0.8)">HP</text>
+      <rect x="42" y="44" width="120" height="8" rx="1" fill="#111420"/>
+      <rect x="42" y="44" width="68" height="8" rx="1" fill="#e04020"/>
+      <text x="168" y="51" font-family="monospace" font-size="7" fill="rgba(120,130,148,0.7)" text-anchor="end">68/140</text>
+
+      <!-- HP bars (player - bottom) -->
+      <rect x="340" y="330" width="160" height="42" rx="2" fill="#0d0e18" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="348" y="346" font-family="monospace" font-size="9" fill="rgba(200,202,216,0.9)" font-weight="bold">MEWTWO</text>
+      <text x="492" y="346" font-family="monospace" font-size="8" fill="rgba(200,202,216,0.6)" text-anchor="end">Lv.65</text>
+      <text x="348" y="360" font-family="monospace" font-size="7" fill="rgba(120,130,148,0.8)">HP</text>
+      <rect x="362" y="354" width="120" height="8" rx="1" fill="#111420"/>
+      <rect x="362" y="354" width="110" height="8" rx="1" fill="#40b820"/>
+      <text x="488" y="361" font-family="monospace" font-size="7" fill="rgba(120,130,148,0.7)" text-anchor="end">110/120</text>
+
+      <!-- Charizard silhouette (opponent, top platform) -->
+      <g transform="translate(310,130) scale(0.85)">
+        <!-- Body -->
+        <ellipse cx="40" cy="70" rx="22" ry="28" fill="#c04010" opacity="0.85"/>
+        <!-- Belly -->
+        <ellipse cx="40" cy="75" rx="14" ry="20" fill="#e0a060" opacity="0.7"/>
+        <!-- Neck -->
+        <rect x="32" y="44" width="16" height="18" rx="4" fill="#c04010" opacity="0.85"/>
+        <!-- Head -->
+        <ellipse cx="40" cy="38" rx="16" ry="14" fill="#c04010" opacity="0.85"/>
+        <!-- Snout -->
+        <ellipse cx="52" cy="42" rx="8" ry="6" fill="#b03808" opacity="0.85"/>
+        <!-- Horn -->
+        <polygon points="36,24 32,10 40,22" fill="#d05018" opacity="0.8"/>
+        <!-- Left wing -->
+        <polygon points="20,50 -18,20 -8,60 18,72" fill="#3870c0" opacity="0.7"/>
+        <!-- Right wing (behind) -->
+        <polygon points="60,50 90,24 78,62 58,70" fill="#305898" opacity="0.5"/>
+        <!-- Tail -->
+        <path d="M20,88 Q4,105 10,118 Q18,128 24,118" fill="none" stroke="#c04010" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+        <!-- Tail flame -->
+        <ellipse cx="24" cy="115" rx="7" ry="10" fill="#f8a020" opacity="0.9"/>
+        <ellipse cx="24" cy="113" rx="4" ry="7" fill="#fff080" opacity="0.7"/>
+        <!-- Eye -->
+        <circle cx="44" cy="36" r="3" fill="#102840"/>
+        <circle cx="45" cy="35" r="1" fill="rgba(255,255,255,0.6)"/>
+        <!-- Claws / feet -->
+        <path d="M30,96 L26,106 M36,98 L34,108 M44,97 L44,107" stroke="#a03008" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+        <!-- Arms -->
+        <path d="M18,65 Q8,72 12,80" stroke="#c04010" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <path d="M62,65 Q70,70 66,78" stroke="#c04010" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.85"/>
+      </g>
+
+      <!-- Mewtwo silhouette (player, bottom platform) -->
+      <g transform="translate(88,205)">
+        <!-- Tail -->
+        <path d="M56,95 Q80,115 72,130 Q64,142 56,132" fill="none" stroke="#b080d0" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+        <!-- Body -->
+        <ellipse cx="44" cy="72" rx="20" ry="26" fill="#c090e0" opacity="0.85"/>
+        <!-- Chest -->
+        <ellipse cx="44" cy="80" rx="13" ry="18" fill="#a870c8" opacity="0.6"/>
+        <!-- Neck -->
+        <rect x="37" y="46" width="14" height="18" rx="3" fill="#c090e0" opacity="0.85"/>
+        <!-- Head -->
+        <ellipse cx="44" cy="38" rx="18" ry="16" fill="#c090e0" opacity="0.85"/>
+        <!-- Ears / head tubes -->
+        <path d="M34,24 Q28,12 32,6" stroke="#c090e0" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <path d="M54,24 Q60,12 56,6" stroke="#c090e0" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <!-- Eyes -->
+        <ellipse cx="36" cy="36" rx="5" ry="4" fill="#80c0ff" opacity="0.9"/>
+        <ellipse cx="52" cy="36" rx="5" ry="4" fill="#80c0ff" opacity="0.9"/>
+        <circle cx="37" cy="37" r="2" fill="#102840"/>
+        <circle cx="53" cy="37" r="2" fill="#102840"/>
+        <!-- Arms -->
+        <path d="M24,66 Q12,75 16,86" stroke="#c090e0" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <path d="M64,66 Q76,74 72,84" stroke="#c090e0" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <!-- Legs -->
+        <path d="M36,96 L32,112" stroke="#c090e0" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+        <path d="M52,96 L56,112" stroke="#c090e0" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+        <!-- Psychic aura glow -->
+        <circle cx="44" cy="60" r="36" fill="none" stroke="rgba(180,120,255,0.12)" stroke-width="3"/>
+        <circle cx="44" cy="60" r="44" fill="none" stroke="rgba(180,120,255,0.07)" stroke-width="2"/>
+      </g>
+
+      <!-- Battle effect — psychic energy rings -->
+      <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(180,120,255,0.08)" stroke-width="2"/>
+      <circle cx="200" cy="200" r="70" fill="none" stroke="rgba(180,120,255,0.05)" stroke-width="1.5"/>
+
+      <!-- Ground shadow / fog at base -->
+      <ellipse cx="260" cy="370" rx="260" ry="40" fill="#060808" opacity="0.6"/>
+
+      <!-- Subtle vignette -->
+      <rect width="520" height="400" fill="url(#sky)" opacity="0" />
+      <rect width="60" height="400" fill="url(#sky)" opacity="0.5"/>
+    </svg>
+  </div>
   <div class="hero-inner">
-    <div class="hero-eyebrow">Pokémon TCG · Collector's Guide · Kanto Region</div>
-    <h1>
-      <span class="fr">FireRed</span> &amp; <span class="lg">LeafGreen</span><br>
-      Kanto TCG Guide
-    </h1>
-    <p class="hero-subtitle">The Original 151 — Complete Card Collection</p>
-    <p class="hero-desc">Every English-language TCG card for all 151 original Kanto Pokémon. Live card images, current market prices, PSA population data, and direct buy links.</p>
+    <div class="hero-eyebrow">Pokémon TCG · Generation I · Kanto Region</div>
+    <h1>Kanto <span class="accent-red">TCG</span></h1>
+    <p class="hero-sub">Hub for card collectors who love Generation I — TCG Database</p>
+    <p class="hero-desc">Every English-language card for all 151 original Kanto Pokémon. Live card images, current market prices, PSA data and direct buy links.</p>
     <div class="btn-row">
-      <a class="frlg-btn primary" style="color:#fff" href="#pokemon-section">View Full Pokédex →</a>
-      <a class="frlg-btn secondary" href="charizard.html">Start with Charizard</a>
-      <a class="frlg-btn outline" href="mewtwo.html">Legendary Cards</a>
+      <a class="site-btn primary" href="#pokemon-section">View Pokédex →</a>
+      <a class="site-btn ghost" href="charizard.html">Charizard Cards</a>
+      <a class="site-btn ghost" href="mewtwo.html">Mewtwo Cards</a>
     </div>
-    <div class="hero-info-boxes">
-      <div class="info-box"><div class="info-box-val" id="stat-count">151</div><div class="info-box-label">Pokémon</div></div>
-      <div class="info-box"><div class="info-box-val">1999</div><div class="info-box-label">First Cards</div></div>
-      <div class="info-box"><div class="info-box-val green">Gen I</div><div class="info-box-label">Kanto Region</div></div>
-      <div class="info-box"><div class="info-box-val" style="color:var(--gold)">★</div><div class="info-box-label">Fan Favourites</div></div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-val" id="stat-count">151</div><div class="hstat-label">Pokémon</div></div>
+      <div class="hstat"><div class="hstat-val">1999</div><div class="hstat-label">First Set</div></div>
+      <div class="hstat"><div class="hstat-val green">Gen I</div><div class="hstat-label">Kanto</div></div>
+      <div class="hstat"><div class="hstat-val" style="color:var(--gold)">25+</div><div class="hstat-label">Years of Cards</div></div>
     </div>
   </div>
 </header>
 
-<!-- TYPE FILTER NAV -->
-<nav class="controls">
-  <div class="controls-inner">
-    <button class="type-tab active" onclick="filterType('all',this)">All Types</button>
-    <button class="type-tab" onclick="filterType('Fire',this)">🔥 Fire</button>
-    <button class="type-tab" onclick="filterType('Water',this)">💧 Water</button>
-    <button class="type-tab" onclick="filterType('Grass',this)">🌿 Grass</button>
-    <button class="type-tab" onclick="filterType('Electric',this)">⚡ Electric</button>
-    <button class="type-tab" onclick="filterType('Psychic',this)">🔮 Psychic</button>
-    <button class="type-tab" onclick="filterType('Normal',this)">Normal</button>
-    <button class="type-tab" onclick="filterType('Poison',this)">Poison</button>
-    <button class="type-tab" onclick="filterType('Fighting',this)">Fighting</button>
-    <button class="type-tab" onclick="filterType('Ghost',this)">Ghost</button>
-    <button class="type-tab" onclick="filterType('Rock',this)">Rock</button>
-    <button class="type-tab" onclick="filterType('Bug',this)">Bug</button>
-    <button class="type-tab" onclick="filterType('Dragon',this)">Dragon</button>
-    <div class="ctrl-right">
-      <span class="count-chip" id="count-chip">151 Pokémon</span>
-      <input type="text" id="search-box" placeholder="Search by name…" oninput="handleSearch(this.value)">
-    </div>
+<div class="filter-bar">
+  <div class="filter-bar-inner">
+    <select class="type-dropdown-btn" id="type-select" onchange="filterType(this.value)">
+      <option value="all">All Types</option>
+      <option value="Fire">🔥 Fire</option>
+      <option value="Water">💧 Water</option>
+      <option value="Grass">🌿 Grass</option>
+      <option value="Electric">⚡ Electric</option>
+      <option value="Psychic">🔮 Psychic</option>
+      <option value="Normal">Normal</option>
+      <option value="Poison">Poison</option>
+      <option value="Fighting">Fighting</option>
+      <option value="Ghost">Ghost</option>
+      <option value="Rock">Rock</option>
+      <option value="Bug">Bug</option>
+      <option value="Ice">Ice</option>
+      <option value="Ground">Ground</option>
+      <option value="Flying">Flying</option>
+      <option value="Dragon">Dragon</option>
+    </select>
+    <input type="text" class="filter-search" id="search-box" placeholder="Search Pokémon by name or #…" oninput="handleSearch(this.value)">
+    <span class="count-chip" id="count-chip">151 Pokémon</span>
   </div>
-</nav>
+</div>
 
 <main>
 
-  <!-- STARTERS -->
-  <section style="margin-bottom:48px">
+  <section style="margin-bottom:36px">
     <div class="sec-head">
-      <h2>Choose Your Starter</h2>
-      <span>The original Gen I trio</span>
+      <h2>Notable Cards</h2>
+      <span>Rarest · Most valuable · Most sought after</span>
     </div>
-    <div class="starters-row" id="starters-row"></div>
+    <div class="notable-grid" id="notable-grid"></div>
   </section>
 
-  <!-- LEGENDARY BANNER -->
   <div class="legendary-banner">
-    <span class="legendary-banner-icon">✨</span>
-    <div>
-      <div class="legendary-banner-title">Legendary & Mythical Pokémon</div>
-      <div class="legendary-banner-desc">Articuno, Zapdos, Moltres, Mewtwo and Mew — some of the most valuable and iconic cards in the entire hobby.</div>
+    <span class="leg-icon">✨</span>
+    <div class="leg-text">
+      <div class="leg-title">Legendary &amp; Mythical Pokémon</div>
+      <div class="leg-desc">Articuno, Zapdos, Moltres, Mewtwo and Mew — the most iconic and valuable cards in Gen I.</div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
-      <a class="frlg-btn primary" style="color:#fff" href="articuno.html">Articuno</a>
-      <a class="frlg-btn outline" href="zapdos.html">Zapdos</a>
-      <a class="frlg-btn outline" href="moltres.html">Moltres</a>
-      <a class="frlg-btn secondary" href="mewtwo.html">Mewtwo</a>
-      <a class="frlg-btn outline" href="mew.html">Mew</a>
+    <div class="leg-btns">
+      <a class="leg-btn articuno" href="articuno.html">Articuno</a>
+      <a class="leg-btn zapdos"   href="zapdos.html">Zapdos</a>
+      <a class="leg-btn moltres"  href="moltres.html">Moltres</a>
+      <a class="leg-btn mewtwo"   href="mewtwo.html">Mewtwo</a>
+      <a class="leg-btn mew"      href="mew.html">Mew</a>
     </div>
   </div>
 
-  <!-- ALL POKÉMON -->
   <section id="pokemon-section">
     <div class="sec-head">
       <h2>All 151 Kanto Pokémon</h2>
-      <span id="count-label">Pokémon #001–#151</span>
+      <span id="count-label">#001–#151</span>
     </div>
     <div id="poke-list"></div>
   </section>
@@ -355,104 +533,85 @@
   <p>
     Card images via the <a href="https://pokemontcg.io" target="_blank">Pokémon TCG API</a> ·
     Sprites via <a href="https://pokeapi.co" target="_blank">PokéAPI</a> ·
-    All Pokémon names and related media are property of Nintendo / The Pokémon Company International.<br>
+    All Pokémon names and media are property of Nintendo / The Pokémon Company International.<br>
     Fan-made collector's reference — not affiliated with Nintendo, The Pokémon Company, or TCGPlayer.
   </p>
 </footer>
 
 <script src="data.js"></script>
 <script>
-const STARTERS = [
-  { slug:'bulbasaur',  label:'Grass Starter',  desc:'Underrated but beloved. Base Set holo has incredible Ken Sugimori art.', cls:'grass' },
-  { slug:'charmander', label:'Fire Starter',   desc:'Home of Charizard #4 — the most iconic card in the hobby\'s history.', cls:'fire' },
-  { slug:'squirtle',   label:'Water Starter',  desc:'Blastoise #2 is a Base Set grail and a fan-favourite for collectors.', cls:'water' },
+const NOTABLE_CARDS = [
+  { slug:'charizard', chip:'#1 Most Iconic',    name:'Charizard', set:'Base Set #4',           desc:'The most famous card ever printed. PSA 10 copies sell for tens of thousands of dollars.', color:'#e83010' },
+  { slug:'blastoise', chip:'#2 Base Set Grail', name:'Blastoise', set:'Base Set #2',            desc:'One of the three iconic original starter holos. A cornerstone WotC era grail.', color:'#6890f0' },
+  { slug:'mewtwo',    chip:'Most Powerful',     name:'Mewtwo',    set:'Multiple Prints',        desc:'The legendary genetic Pokémon has some of the most desirable full art cards in the hobby.', color:'#a890f0' },
+  { slug:'pikachu',   chip:'Most Collected',    name:'Pikachu',   set:'Base Set — Many Variants',desc:'Yellow Cheeks vs Red Cheeks — Pikachu variants are among the most collected worldwide.', color:'#f8c830' },
+  { slug:'mew',       chip:'Rarest Mythical',   name:'Mew',       set:'Ancient Mew / Neo / Modern', desc:'The rarest of the original 151. Mew cards are consistently the most sought after promos.', color:'#f870c0' },
+  { slug:'gengar',    chip:'Fan Favourite',     name:'Gengar',    set:'Base Set #5 Holo',       desc:'One of the most beloved Base Set holos. Gengar consistently commands premium prices.', color:'#705898' },
 ];
 
-let activeType = 'all';
-let searchQuery = '';
+let activeType='all', searchQuery='';
 
 function spriteURL(id) {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 }
-
 function typeTag(t) {
-  const cls = TYPE_CLASSES[t] || 'tt-normal';
-  return `<span class="type-tag ${cls}">${t}</span>`;
+  return `<span class="type-tag ${TYPE_CLASSES[t]||'tt-normal'}">${t}</span>`;
 }
 
-/* Starters */
-function buildStarters() {
-  document.getElementById('starters-row').innerHTML = STARTERS.map(s => {
-    const p = KANTO_POKEMON.find(x => x.slug === s.slug);
-    if (!p) return '';
-    return `<a class="starter-card ${s.cls}" href="${p.slug}.html">
-      <div class="starter-img"><img src="${spriteURL(p.id)}" alt="${p.name}" loading="lazy"></div>
+function buildNotable() {
+  document.getElementById('notable-grid').innerHTML = NOTABLE_CARDS.map((c,i) => {
+    const p = KANTO_POKEMON.find(x=>x.slug===c.slug);
+    if(!p) return '';
+    return `<a class="notable-card" href="${c.slug}.html" style="--nc-color:${c.color}">
+      <div class="notable-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="notable-img"><img src="${spriteURL(p.id)}" alt="${c.name}" loading="lazy" decoding="async"></div>
       <div>
-        <div class="starter-chip">${s.label}</div>
-        <div class="starter-name">${p.name}</div>
-        <div class="starter-desc">${s.desc}</div>
+        <div class="notable-chip">${c.chip}</div>
+        <div class="notable-name">${c.name}</div>
+        <div class="notable-desc">${c.set} — ${c.desc}</div>
       </div>
     </a>`;
   }).join('');
 }
 
-/* Main list */
 function renderList() {
-  let list = [...KANTO_POKEMON];
-  if (activeType !== 'all') list = list.filter(p => p.type1 === activeType || p.type2 === activeType);
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    list = list.filter(p => p.name.toLowerCase().includes(q) || String(p.id).padStart(3,'0').includes(q));
-  }
-
-  document.getElementById('count-chip').textContent = list.length + ' Pokémon';
-  document.getElementById('stat-count').textContent = list.length;
-  document.getElementById('count-label').textContent = list.length + ' Pokémon shown';
-
-  const flat = activeType !== 'all' || searchQuery;
-  let html = '';
-
-  if (!flat) {
-    /* Group into categories for readability */
-    const groups = [
-      { label:'Starters & Early Routes', range:[1,30] },
-      { label:'Caves, Forests & Skies', range:[31,60] },
-      { label:'Gyms & Rivals', range:[61,100] },
-      { label:'Safari Zone & Sea', range:[101,130] },
-      { label:'Eeveelutions & Fossils', range:[131,151] },
-    ];
-    groups.forEach(g => {
-      const group = list.filter(p => p.id >= g.range[0] && p.id <= g.range[1]);
-      if (!group.length) return;
-      html += `<div class="gen-section">
-        <div class="gen-label">${g.label} <span class="dex-range">#${String(g.range[0]).padStart(3,'0')}–#${String(Math.min(g.range[1], list[list.length-1]?.id || 151)).padStart(3,'0')}</span></div>
-        <div class="poke-grid">`;
-      group.forEach((p, i) => { html += pokeCardHTML(p, i); });
-      html += '</div></div>';
+  let list=[...KANTO_POKEMON];
+  if(activeType!=='all') list=list.filter(p=>p.type1===activeType||p.type2===activeType);
+  if(searchQuery){const q=searchQuery.toLowerCase();list=list.filter(p=>p.name.toLowerCase().includes(q)||String(p.id).padStart(3,'0').includes(q));}
+  document.getElementById('count-chip').textContent=list.length+' Pokémon';
+  document.getElementById('stat-count').textContent=list.length;
+  document.getElementById('count-label').textContent=list.length+' shown';
+  const flat=activeType!=='all'||searchQuery;
+  let html='';
+  if(!flat){
+    [{label:'Starters & Early Routes',range:[1,30]},{label:'Caves, Forests & Skies',range:[31,60]},{label:'Gyms & Rivals',range:[61,100]},{label:'Safari Zone & Sea',range:[101,130]},{label:'Eeveelutions, Fossils & Legendaries',range:[131,151]}].forEach(g=>{
+      const grp=list.filter(p=>p.id>=g.range[0]&&p.id<=g.range[1]);
+      if(!grp.length)return;
+      html+=`<div class="gen-section"><div class="gen-label">${g.label} <span style="color:var(--muted2);font-size:9px;margin-left:4px">#${String(g.range[0]).padStart(3,'0')}–#${String(g.range[1]).padStart(3,'0')}</span></div><div class="poke-grid">`;
+      grp.forEach((p,i)=>{html+=pokeCardHTML(p,i);});
+      html+='</div></div>';
     });
   } else {
-    if (!list.length) { html = '<div class="status-block">No Pokémon found.</div>'; }
-    else {
-      html += `<div class="gen-label">${activeType !== 'all' ? activeType + ' Type' : 'Search Results'} — ${list.length} Pokémon</div>`;
-      html += '<div class="poke-grid">';
-      list.forEach((p, i) => { html += pokeCardHTML(p, i); });
-      html += '</div>';
+    if(!list.length){html='<div class="status-block">No Pokémon found.</div>';}
+    else{
+      html+=`<div class="gen-label" style="margin-bottom:12px">${activeType!=='all'?activeType+' Type':'Search Results'} — ${list.length} Pokémon</div><div class="poke-grid">`;
+      list.forEach((p,i)=>{html+=pokeCardHTML(p,i);});
+      html+='</div>';
     }
   }
-
-  document.getElementById('poke-list').innerHTML = html;
+  document.getElementById('poke-list').innerHTML=html;
 }
 
-function pokeCardHTML(p, i) {
-  const delay = Math.min(i * 18, 600);
+function pokeCardHTML(p,i) {
+  const delay=Math.min(i*16,500);
   return `<a class="poke-card" href="${p.slug}.html" style="animation-delay:${delay}ms">
     <div class="poke-card-img">
-      <img src="${spriteURL(p.id)}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
+      <img src="${spriteURL(p.id)}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
       <span class="poke-num">#${String(p.id).padStart(3,'0')}</span>
     </div>
     <div class="poke-card-body">
       <div class="poke-card-name">${p.name}</div>
-      <div class="poke-card-types">${typeTag(p.type1)}${p.type2 ? typeTag(p.type2) : ''}</div>
+      <div class="poke-card-types">${typeTag(p.type1)}${p.type2?typeTag(p.type2):''}</div>
       <div class="poke-card-desc">${p.desc}</div>
     </div>
     <div class="poke-card-footer">
@@ -462,27 +621,17 @@ function pokeCardHTML(p, i) {
   </a>`;
 }
 
-function filterType(type, btn) {
-  activeType = type;
-  document.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
+function filterType(val){activeType=val;renderList();}
+function handleSearch(val){searchQuery=val.trim();renderList();}
+
+if(window.location.protocol==='file:'){
+  const w=document.createElement('div');
+  w.style.cssText='background:rgba(200,152,16,.07);border-bottom:1px solid rgba(200,152,16,.2);padding:10px 32px;font-size:11px;font-weight:600;color:var(--gold);';
+  w.innerHTML='⚠ Open via local server for card images — run START-WINDOWS.bat or START-MAC-LINUX.sh, then visit http://localhost:8080';
+  document.body.insertBefore(w,document.body.firstChild);
 }
 
-function handleSearch(val) {
-  searchQuery = val.trim();
-  renderList();
-}
-
-/* file:// warning */
-if (window.location.protocol === 'file:') {
-  const w = document.createElement('div');
-  w.style.cssText = 'background:rgba(200,152,16,.08);border-bottom:1px solid rgba(200,152,16,.25);padding:12px 32px;font-size:12px;font-weight:600;color:var(--gold);';
-  w.innerHTML = '⚠️ <strong>To load card images:</strong> use the START-WINDOWS.bat or START-MAC-LINUX.sh launcher, then open <strong>http://localhost:8080</strong>';
-  document.body.insertBefore(w, document.body.firstChild);
-}
-
-buildStarters();
+buildNotable();
 renderList();
 </script>
 </body>
