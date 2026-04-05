@@ -84,6 +84,41 @@
 
   main { max-width: 1280px; margin: 0 auto; padding: 40px 40px 80px; }
 
+  /* Price refresh */
+  .price-ts { font-size:9px; color:var(--muted2); font-weight:600; white-space:nowrap; letter-spacing:0.2px; }
+  .refresh-btn {
+    background: var(--surface); border: 1px solid var(--border2);
+    color: var(--muted); font-size: 14px; cursor: pointer;
+    width: 28px; height: 28px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0; font-weight: 900;
+    line-height: 1; padding: 0;
+  }
+  .refresh-btn:hover { border-color: var(--fr-red); color: var(--fr-red); }
+  .refresh-btn.spinning { animation: spin 0.6s linear infinite; }
+  /* Nav search dropdown */
+  .nav-sd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; text-decoration: none; color: var(--text2);
+    font-size: 12px; font-weight: 600; transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-sd-item:last-child { border-bottom: none; }
+  .nav-sd-item:hover, .nav-sd-item.nsd-focused { background: var(--surface); color: var(--fr-red); }
+  .nav-sd-item img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .nav-sd-num { font-size: 9px; color: var(--muted2); }
+  .nav-sd-name { font-family: var(--display); font-size: 14px; font-weight: 800; }
+  /* Sets auto-update badge */
+  .auto-update-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 9px; font-weight: 700; color: var(--lg-green);
+    background: rgba(34,152,48,0.1); border: 1px solid rgba(34,152,48,0.25);
+    padding: 2px 8px; border-radius: var(--r-sm); text-transform: uppercase;
+    letter-spacing: 0.4px; margin-left: 8px;
+  }
+  .auto-update-badge::before { content: '●'; font-size: 7px; animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
   @media (max-width: 700px) {
     .poke-hero { padding: 40px 20px 32px; }
     .poke-hero-inner { flex-direction: column; gap: 20px; }
@@ -115,8 +150,13 @@
       <a class="nav-link" href="mewtwo.html">Mewtwo</a>
       <a class="nav-link" href="mew.html">Mew</a>
     </div>
-    <div class="nav-search">
-      <input type="text" placeholder="Go to Pokémon…" onkeydown="handleNavSearch(event,this.value)">
+    <div class="nav-search" style="position:relative">
+      <input type="text" id="nav-search-input" placeholder="Go to Pokémon…"
+             oninput="navSearchInput(this.value)"
+             onfocus="navSearchInput(this.value)"
+             onkeydown="navSearchKey(event)"
+             autocomplete="off" spellcheck="false">
+      <div id="nav-search-dd" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:260px;background:var(--nav-bg);border:1px solid var(--border2);border-top:2px solid var(--fr-red);max-height:320px;overflow-y:auto;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,0.8);"></div>
     </div>
   </div>
 </nav>
@@ -138,6 +178,8 @@
     <button class="era-tab" onclick="setEra('SV',this)">Scarlet &amp; Violet</button>
     <div class="ctrl-right">
       <span class="count-chip" id="count-chip">Loading…</span>
+      <span class="price-ts" id="price-ts" title="Prices are fetched live from TCGPlayer via the Pokémon TCG API"></span>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshPrices()" title="Refresh card prices">↻</button>
       <select class="ctrl-select" onchange="renderCards()">
         <option value="year-asc">Oldest first</option>
         <option value="year-desc">Newest first</option>
@@ -153,6 +195,17 @@
 
 <main>
   <div id="card-area"><div class="status-block"><div class="spinner"></div><br>Loading all cards…</div></div>
+  <!-- Auto-update info -->
+  <div id="auto-info" style="display:none;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--lg-green);padding:12px 16px;margin-top:32px;border-radius:var(--r-lg)">
+    <p style="font-size:11px;color:var(--muted);font-weight:600;line-height:1.7;">
+      <strong style="color:var(--text)">🔄 Always up to date</strong>
+      <span class="auto-update-badge">Live</span><br>
+      Card prices are pulled live from <strong style="color:var(--text)">TCGPlayer</strong> via the Pokémon TCG API every time you visit this page — no manual updates needed.
+      When new sets are released (like <em>Prismatic Evolutions</em> or <em>Mega Evolution</em>), those cards automatically appear here on the next page load.
+      Use the <strong style="color:var(--text)">↻ refresh button</strong> above to re-fetch the latest prices without reloading the page.
+    </p>
+  </div>
+
   <section class="section" id="buy-section" style="margin-top:52px;display:none">
     <h2 class="section-title">Where to Buy</h2>
     <p class="section-sub" id="buy-sub"></p>
@@ -455,6 +508,57 @@ function buildNav(slug){
 }
 function handleNavSearch(e,val){if(e.key!=='Enter')return;const q=val.trim().toLowerCase();const m=KANTO_POKEMON.find(p=>p.name.toLowerCase().startsWith(q)||p.slug===q.replace(/\s+/g,'-'));if(m)window.location.href=`${m.slug}.html`;}
 
+/* ── NAV SEARCH DROPDOWN ── */
+let nsdIdx = -1;
+function navSearchInput(val) {
+  const q = val.trim().toLowerCase();
+  const dd = document.getElementById('nav-search-dd');
+  if (!q) { dd.style.display='none'; nsdIdx=-1; return; }
+  const matches = KANTO_POKEMON.filter(p =>
+    p.name.toLowerCase().includes(q) || String(p.id).padStart(3,'0').includes(q)
+  ).slice(0, 10);
+  nsdIdx = -1;
+  if (!matches.length) { dd.innerHTML='<div style="padding:12px 14px;font-size:11px;color:var(--muted);font-weight:600">No Pokémon found</div>'; dd.style.display='block'; return; }
+  dd.innerHTML = matches.map((p,i) =>
+    `<a class="nav-sd-item" href="${p.slug}.html" data-nsd="${i}">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}" loading="lazy">
+      <div><div class="nav-sd-num">#${String(p.id).padStart(3,'0')}</div><div class="nav-sd-name">${p.name}</div></div>
+    </a>`
+  ).join('');
+  dd.style.display = 'block';
+}
+function navSearchKey(e) {
+  const dd = document.getElementById('nav-search-dd');
+  const items = dd.querySelectorAll('.nav-sd-item');
+  if (!items.length) return;
+  if (e.key==='ArrowDown'){e.preventDefault();nsdIdx=Math.min(nsdIdx+1,items.length-1);items.forEach((el,i)=>el.classList.toggle('nsd-focused',i===nsdIdx));}
+  else if (e.key==='ArrowUp'){e.preventDefault();nsdIdx=Math.max(nsdIdx-1,0);items.forEach((el,i)=>el.classList.toggle('nsd-focused',i===nsdIdx));}
+  else if (e.key==='Enter'){if(nsdIdx>=0&&items[nsdIdx])window.location.href=items[nsdIdx].href;else if(items.length===1)window.location.href=items[0].href;}
+  else if (e.key==='Escape'){dd.style.display='none';}
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('nav-search-input')?.closest('.nav-search');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('nav-search-dd').style.display='none';
+});
+
+/* ── PRICE REFRESH ── */
+function setTimestamp() {
+  const ts = document.getElementById('price-ts');
+  if (!ts) return;
+  const now = new Date();
+  ts.textContent = `Updated ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  ts.title = `Prices last fetched at ${now.toLocaleTimeString()}. New card sets appear automatically.`;
+}
+async function refreshPrices() {
+  if (!curPoke) return;
+  const btn = document.getElementById('refresh-btn');
+  if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
+  ALL = []; // clear cache so fetch runs fresh
+  await fetchCards(curPoke.name);
+  if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+  setTimestamp();
+}
+
 /* Boot */
 (async function init(){
   curPoke=KANTO_POKEMON.find(p=>p.slug===curSlug);
@@ -463,6 +567,10 @@ function handleNavSearch(e,val){if(e.key!=='Enter')return;const q=val.trim().toL
   buildHero(curPoke);
   buildNav(curSlug);
   await fetchCards(curPoke.name);
+  setTimestamp();
+  // Show auto-info after load
+  const ai = document.getElementById('auto-info');
+  if (ai) ai.style.display = 'block';
 })();
 </script>
 </body>
