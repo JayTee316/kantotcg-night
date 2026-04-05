@@ -4,9 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kanto TCG — Loading…</title>
-<script src="theme.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
+  .lang-flag {
+    position: absolute; top: 5px; left: 5px;
+    font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.65);
+    color: var(--text); padding: 2px 5px; border-radius: var(--r-sm);
+    letter-spacing: 0.2px;
+  }
+  /* ── LANGUAGE BAR ── */
+  .lang-bar {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0 40px; position: sticky; top: 52px; z-index: 101;
+  }
+  .lang-bar-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; gap: 6px; height: 40px;
+  }
+  .lang-label { font-size: 10px; font-weight: 800; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; white-space: nowrap; }
+  .lang-btn {
+    font-family: var(--sans); font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: var(--r-sm);
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--muted); cursor: pointer; transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .lang-btn:hover { color: var(--text); border-color: var(--border3); }
+  .lang-btn.active { background: var(--surface2); color: var(--text); border-color: var(--fr-red); }
+  @media (max-width:700px) { .lang-bar { padding: 0 12px; } .lang-label { display:none; } }
+
+  /* GB lang bar override */
+  [data-theme="gb"] .lang-bar { background: var(--bg); border-bottom: 2px solid var(--border2); }
+  [data-theme="gb"] .lang-btn { border-color: var(--border2); color: var(--muted); font-family: 'Press Start 2P', monospace; font-size: 7px; border-radius: 0; }
+  [data-theme="gb"] .lang-btn.active { background: var(--surface2); color: var(--text); border-color: var(--fr-red); }
+
   /* ── HERO ── */
   .poke-hero {
     position: relative; overflow: hidden;
@@ -126,7 +157,7 @@
     .poke-hero-sprite { width: 140px; height: 140px; }
     .dex-bg-num { display: none; }
     main { padding: 24px 20px 60px; }
-    .page-controls { padding: 0 12px; top: 56px; }
+    .page-controls { padding: 0 12px; top: 92px; } .lang-bar { top: 52px; }
   }
 </style>
 </head>
@@ -165,6 +196,18 @@
 <header class="poke-hero" id="poke-hero">
   <div class="poke-hero-inner"><div class="status-block"><div class="spinner"></div></div></div>
 </header>
+
+<!-- Language filter bar -->
+<div class="lang-bar">
+  <div class="lang-bar-inner">
+    <span class="lang-label">Language:</span>
+    <button class="lang-btn active" onclick="setLang('en',this)">🇬🇧 English</button>
+    <button class="lang-btn" onclick="setLang('ja',this)">🇯🇵 Japanese</button>
+    <button class="lang-btn" onclick="setLang('zh-TW',this)">🇨🇳 Chinese</button>
+    <button class="lang-btn" onclick="setLang('all',this)">🌐 All Languages</button>
+    <span id="lang-note" style="font-size:10px;color:var(--muted);font-weight:600;margin-left:8px;"></span>
+  </div>
+</div>
 
 <nav class="page-controls">
   <div class="page-controls-inner">
@@ -317,8 +360,26 @@ function lk(c){
   return{buy,psa,ebay,pc};
 }
 
-let ALL=[],activeEra='all',curSlug='kadabra',curPoke=null;
+let ALL=[],activeEra='all',activeLang='en',curSlug='kadabra',curPoke=null;
 const cs={};
+
+/* Language sets per language code in the TCG API */
+const LANG_MAP = {
+  'en':   { label:'English',  note:'Official English prints from all TCG sets.' },
+  'ja':   { label:'Japanese', note:'Japanese prints including Japan-exclusive promos like Ancient Mew.' },
+  'zh-TW':{ label:'Chinese',  note:'Traditional Chinese prints. May have limited pricing data.' },
+  'all':  { label:'All Languages', note:'All available language prints combined.' },
+};
+
+function setLang(lang, btn) {
+  activeLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const note = document.getElementById('lang-note');
+  if (note) note.textContent = LANG_MAP[lang]?.note || '';
+  // Re-fetch with new language
+  if (curPoke) fetchCards(curPoke.name);
+}
 
 /* File check */
 function isFile(){return window.location.protocol==='file:';}
@@ -335,29 +396,84 @@ function showFileErr(){
   document.getElementById('count-chip').textContent='— cards';
 }
 
-/* Fetch */
+/* Fetch — with language support */
+async function fetchPage(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
 async function fetchCards(name){
   if(isFile()){showFileErr();buildBuy();return;}
-  document.getElementById('card-area').innerHTML=`<div class="status-block"><div class="spinner"></div><br>Loading all <strong>${name}</strong> cards…</div>`;
-  let cards=[];
-  try{
-    const enc=encodeURIComponent(`name:"${name}"`);
-    const ctrl=new AbortController();
-    const t=setTimeout(()=>ctrl.abort(),14000);
-    const r1=await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`,{signal:ctrl.signal});
-    clearTimeout(t);
-    if(!r1.ok)throw new Error(r1.status);
-    const j1=await r1.json();
-    cards=j1.data||[];
-    const total=j1.totalCount||cards.length;
-    if(total>250){const pages=Math.ceil(total/250);for(let p=2;p<=pages;p++){const rp=await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);const jp=await rp.json();cards=cards.concat(jp.data||[]);}}
-  }catch(e){
-    console.warn('API error:',e);
-    if(!cards.length){document.getElementById('card-area').innerHTML=`<div class="status-block">Connection error. Check your internet and reload.</div>`;buildBuy();return;}
+  document.getElementById('card-area').innerHTML=`<div class="status-block"><div class="spinner"></div><br>Loading <strong>${name}</strong> cards…</div>`;
+
+  // Decide which languages to fetch
+  const langs = activeLang === 'all' ? ['en','ja','zh-TW'] : [activeLang];
+  let cards = [];
+
+  try {
+    for (const lang of langs) {
+      // Query: name match + language filter
+      // For English: exact name match to avoid noise
+      // For JP/CN: broader search since names differ — search by nationalPokedexNumbers instead if available,
+      // otherwise use a loose name search and filter by language
+      let langCards = [];
+
+      if (lang === 'en') {
+        // Exact English name
+        const enc = encodeURIComponent(`name:"${name}"`);
+        const j1 = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
+        langCards = j1.data || [];
+        const total = j1.totalCount || langCards.length;
+        if (total > 250) {
+          const pages = Math.ceil(total / 250);
+          for (let p = 2; p <= pages; p++) {
+            const jp = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
+            langCards = langCards.concat(jp.data || []);
+          }
+        }
+      } else {
+        // For non-English: search by name loosely + filter by set.ptcgoCode or language field
+        // The TCG API v2 has a 'language' field we can query
+        const enc = encodeURIComponent(`name:"${name}" language:${lang}`);
+        try {
+          const j1 = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
+          langCards = j1.data || [];
+          const total = j1.totalCount || langCards.length;
+          if (total > 250) {
+            const pages = Math.ceil(total / 250);
+            for (let p = 2; p <= pages; p++) {
+              const jp = await fetchPage(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
+              langCards = langCards.concat(jp.data || []);
+            }
+          }
+        } catch(le) {
+          console.warn(`Language ${lang} fetch failed:`, le);
+        }
+      }
+
+      // Tag cards with their language for display
+      langCards.forEach(c => { if (!c._lang) c._lang = lang; });
+      cards = cards.concat(langCards);
+    }
+
+    // Deduplicate by card id
+    const seen = new Set();
+    cards = cards.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+
+  } catch(e) {
+    console.warn('API error:', e);
+    if (!cards.length) {
+      document.getElementById('card-area').innerHTML = `<div class="status-block">Connection error. Check your internet and reload.</div>`;
+      buildBuy(); return;
+    }
   }
-  ALL=cards;
-  const hc=document.getElementById('hero-count');if(hc)hc.textContent=cards.length;
-  renderCards();buildBuy();
+
+  ALL = cards;
+  const hc = document.getElementById('hero-count');
+  if (hc) hc.textContent = cards.length;
+  renderCards();
+  buildBuy();
 }
 
 /* Render */
@@ -401,12 +517,13 @@ function cardHTML(c,idx){
   const delay=Math.min(idx*20,500);
   const stars='★'.repeat(Math.min(Math.ceil(rr(c)/2),5));
   const yr=(c.set?.releaseDate||'').slice(0,4);
+  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-TW' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
   cs[sid]=c;
   return`<div class="pcard${notable?' notable':''}" style="animation-delay:${delay}ms" onclick="openModal('${sid}')">
     <div class="pcard-img-wrap">
       ${img?`<img src="${img}" alt="${c.name}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:``}
       <div class="img-placeholder"${img?' style="display:none"':''}>?</div>
-      ${notable?'<div class="notable-ribbon">★ Notable</div>':''}
+      ${notable?'<div class="notable-ribbon">★ Notable</div>':''}${langBadge}
       <div class="year-tag">${yr}</div>
     </div>
     <div class="pcard-body">
@@ -436,6 +553,7 @@ function openModal(sid){
   const {buy,psa,ebay,pc}=lk(c);
   const badges=badgesFor(c).map(([cl,l])=>`<span class="badge ${cl}">${l}</span>`).join('');
   const yr=(c.set?.releaseDate||'').slice(0,4);
+  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-TW' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
   const artist=c.artist?`<div style="font-size:12px;color:var(--muted);margin-top:5px;font-weight:700;">Illus. ${c.artist}</div>`:'';
   const hp=c.hp?`<span style="font-size:13px;color:var(--muted);margin-left:8px;font-weight:700;">HP ${c.hp}</span>`:'';
   document.getElementById('modal-inner').innerHTML=`
@@ -574,5 +692,6 @@ async function refreshPrices() {
   if (ai) ai.style.display = 'block';
 })();
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

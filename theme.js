@@ -1,50 +1,56 @@
 /* ═══════════════════════════════════════════════════
    KANTO TCG — THEME SWITCHER
-   Toggles between FireRed/LeafGreen dark and Game Boy
-   Preference saved to localStorage
+   Toggles FireRed/LeafGreen dark ↔ Game Boy green
    ═══════════════════════════════════════════════════ */
-
 (function () {
-  const STORAGE_KEY = 'kanto-tcg-theme';
-  const THEMES = {
-    frlg: { icon: '🔴', label: 'GB Mode',  attr: null   },
-    gb:   { icon: '🟢', label: 'FR/LG Mode', attr: 'gb' },
-  };
+  const KEY = 'kanto-theme';
 
-  /* Apply theme immediately on script load (before paint) */
-  const saved = localStorage.getItem(STORAGE_KEY) || 'frlg';
-  if (saved === 'gb') {
-    document.documentElement.setAttribute('data-theme', 'gb');
-  } else {
-    document.documentElement.removeAttribute('data-theme');
+  function getSaved() {
+    try { return localStorage.getItem(KEY) || 'frlg'; } catch(e) { return 'frlg'; }
+  }
+  function setSaved(v) {
+    try { localStorage.setItem(KEY, v); } catch(e) {}
   }
 
-  /* Inject toggle button once DOM is ready */
+  function applyTheme(theme) {
+    if (theme === 'gb') {
+      document.documentElement.setAttribute('data-theme', 'gb');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  /* Apply immediately to prevent flash */
+  applyTheme(getSaved());
+
   function injectButton() {
-    const btn = document.createElement('button');
-    btn.className = 'theme-toggle';
-    btn.id = 'theme-toggle-btn';
-    updateButton(btn, saved);
-    btn.addEventListener('click', () => {
-      const current = localStorage.getItem(STORAGE_KEY) || 'frlg';
-      const next = current === 'frlg' ? 'gb' : 'frlg';
-      localStorage.setItem(STORAGE_KEY, next);
-      if (next === 'gb') {
-        document.documentElement.setAttribute('data-theme', 'gb');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-      }
-      updateButton(btn, next);
-    });
-    document.body.appendChild(btn);
-  }
+    const existing = document.getElementById('theme-toggle-btn');
+    if (existing) existing.remove();
 
-  function updateButton(btn, theme) {
-    const t = THEMES[theme];
-    btn.innerHTML = `<span class="theme-toggle-icon">${t.icon}</span>${t.label}`;
-    btn.title = theme === 'frlg'
-      ? 'Switch to Game Boy green theme'
-      : 'Switch to FireRed / LeafGreen dark theme';
+    const btn = document.createElement('button');
+    btn.id = 'theme-toggle-btn';
+    btn.className = 'theme-toggle';
+
+    function updateBtn(theme) {
+      if (theme === 'gb') {
+        btn.innerHTML = '<span class="theme-toggle-icon">🔴</span>FR/LG Mode';
+        btn.title = 'Switch to FireRed / LeafGreen dark theme';
+      } else {
+        btn.innerHTML = '<span class="theme-toggle-icon">🟢</span>GB Mode';
+        btn.title = 'Switch to Game Boy green theme';
+      }
+    }
+
+    updateBtn(getSaved());
+
+    btn.addEventListener('click', function () {
+      const next = getSaved() === 'frlg' ? 'gb' : 'frlg';
+      setSaved(next);
+      applyTheme(next);
+      updateBtn(next);
+    });
+
+    document.body.appendChild(btn);
   }
 
   if (document.readyState === 'loading') {
