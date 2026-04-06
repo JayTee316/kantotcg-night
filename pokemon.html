@@ -203,7 +203,7 @@
     <span class="lang-label">Language:</span>
     <button class="lang-btn active" onclick="setLang('en',this)">🇬🇧 English</button>
     <button class="lang-btn" onclick="setLang('ja',this)">🇯🇵 Japanese</button>
-    <button class="lang-btn" onclick="setLang('zh-TW',this)">🇨🇳 Chinese</button>
+    <button class="lang-btn" onclick="setLang('zh-tw',this)">🇨🇳 Chinese</button>
     <button class="lang-btn" onclick="setLang('all',this)">🌐 All Languages</button>
     <span id="lang-note" style="font-size:10px;color:var(--muted);font-weight:600;margin-left:8px;"></span>
   </div>
@@ -367,12 +367,12 @@ const cs={};
 const LANG_MAP = {
   'en':   { label:'English',  note:'English prints — live TCGPlayer prices included.' },
   'ja':   { label:'Japanese', note:'Japanese prints via TCGdex — includes Japan-exclusive promos like Ancient Mew.' },
-  'zh-TW':{ label:'Chinese',  note:'Traditional Chinese prints via TCGdex.' },
+  'zh-tw':{ label:'Chinese',  note:'Traditional Chinese prints via TCGdex.' },
   'all':  { label:'All Languages', note:'All prints combined — EN prices shown where available.' },
 };
 
 /* TCGdex language codes */
-const TCGDEX_LANG = { 'ja': 'ja', 'zh-TW': 'zh-TW' };
+const TCGDEX_LANG = { 'ja': 'ja', 'zh-tw': 'zh-tw' };
 
 function setLang(lang, btn) {
   activeLang = lang;
@@ -411,17 +411,22 @@ async function fetchTCGdex(pokeId, langCode) {
   try {
     // Step 1: get all card stubs for this Pokédex number in this language
     const url = `https://api.tcgdex.net/v2/${langCode}/dexids/${pokeId}`;
+    console.log(`[TCGdex] Fetching: ${url}`);
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 12000);
     const r = await fetch(url, { signal: ctrl.signal });
     clearTimeout(t);
     if (!r.ok) {
-      console.warn(`TCGdex ${langCode}/dexids/${pokeId} returned ${r.status}`);
+      console.warn(`[TCGdex] ${url} returned HTTP ${r.status}`);
       return [];
     }
     const raw = await r.json();
+    console.log(`[TCGdex] ${langCode}/dexids/${pokeId} returned ${Array.isArray(raw) ? raw.length : 'non-array'} cards`);
     const briefs = Array.isArray(raw) ? raw : [];
-    if (!briefs.length) return [];
+    if (!briefs.length) {
+      console.warn(`[TCGdex] No cards found for dexId ${pokeId} in ${langCode}`);
+      return [];
+    }
 
     // Step 2: fetch full details in parallel batches of 15
     const BATCH = 15;
@@ -490,7 +495,7 @@ function showFileErr(){
 async function fetchCards(name) {
   if (isFile()) { showFileErr(); buildBuy(); return; }
 
-  const langLabel = {'en':'English','ja':'Japanese','zh-TW':'Chinese','all':'All Languages'}[activeLang] || activeLang;
+  const langLabel = {'en':'English','ja':'Japanese','zh-tw':'Chinese','all':'All Languages'}[activeLang] || activeLang;
   document.getElementById('card-area').innerHTML =
     `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> — ${langLabel}…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">New set cards appear automatically</span></div>`;
 
@@ -505,7 +510,7 @@ async function fetchCards(name) {
       const [en, ja, zhTW] = await Promise.all([
         fetchEN(name),
         fetchTCGdex(curPoke.id, 'ja'),
-        fetchTCGdex(curPoke.id, 'zh-TW'),
+        fetchTCGdex(curPoke.id, 'zh-tw'),
       ]);
       cards = [...en, ...ja, ...zhTW];
     } else {
@@ -546,7 +551,13 @@ function renderCards(){
   else if(sort==='rarity-desc')list.sort((a,b)=>rr(b)-rr(a));
   else if(sort==='rarity-asc')list.sort((a,b)=>rr(a)-rr(b));
   document.getElementById('count-chip').textContent=`${list.length} card${list.length!==1?'s':''}`;
-  if(!list.length){document.getElementById('card-area').innerHTML=`<div class="status-block">No cards in this era.</div>`;return;}
+  if(!list.length){
+    const noCardsMsg = (activeLang === 'ja' || activeLang === 'zh-tw')
+      ? `<div class="status-block">No cards found.<br><span style="font-size:11px;color:var(--muted2);display:block;margin-top:8px">TCGdex may not have ${activeLang === 'ja' ? 'Japanese' : 'Chinese'} data for this Pokémon yet.<br>Their database is community-maintained and some sets may be missing.</span></div>`
+      : `<div class="status-block">No cards in this era.</div>`;
+    document.getElementById('card-area').innerHTML = noCardsMsg;
+    return;
+  }
   let html='';
   if(flat){
     const lbl={'price-desc':'Sorted by price — highest first','price-asc':'Sorted by price — lowest first','rarity-desc':'Sorted by rarity — rarest first','rarity-asc':'Sorted by rarity — most common first'}[sort]||'';
@@ -574,7 +585,7 @@ function cardHTML(c,idx){
   const delay=Math.min(idx*20,500);
   const stars='★'.repeat(Math.min(Math.ceil(rr(c)/2),5));
   const yr=(c.set?.releaseDate||'').slice(0,4);
-  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-TW' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
+  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-tw' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
   cs[sid]=c;
   return`<div class="pcard${notable?' notable':''}" style="animation-delay:${delay}ms" onclick="openModal('${sid}')">
     <div class="pcard-img-wrap">
@@ -610,7 +621,7 @@ function openModal(sid){
   const {buy,psa,ebay,pc}=lk(c);
   const badges=badgesFor(c).map(([cl,l])=>`<span class="badge ${cl}">${l}</span>`).join('');
   const yr=(c.set?.releaseDate||'').slice(0,4);
-  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-TW' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
+  const langBadge = c._lang && c._lang !== 'en' ? `<span class="lang-flag">${c._lang === 'ja' ? '🇯🇵 JP' : c._lang === 'zh-tw' ? '🇨🇳 CN' : c._lang.toUpperCase()}</span>` : '';
   const artist=c.artist?`<div style="font-size:12px;color:var(--muted);margin-top:5px;font-weight:700;">Illus. ${c.artist}</div>`:'';
   const hp=c.hp?`<span style="font-size:13px;color:var(--muted);margin-left:8px;font-weight:700;">HP ${c.hp}</span>`:'';
   document.getElementById('modal-inner').innerHTML=`
