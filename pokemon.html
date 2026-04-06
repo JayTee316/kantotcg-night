@@ -404,50 +404,34 @@ async function fetchEN(name) {
 }
 
 /* Fetch JP or CN cards from TCGdex — uses Pokédex number to find all prints */
-/* TCGdex: fetch ALL JP/CN prints by Pokédex number.
-   Correct endpoint: GET /v2/{lang}/dexids/{number}
-   Returns array of CardBrief objects. Then fetch full details in parallel batches. */
+/* ── TCGdex fetch: all JP/CN cards by Pokédex number ── */
 async function fetchTCGdex(pokeId, langCode) {
   try {
-    // Step 1: get all card stubs for this Pokédex number in this language
     const url = `https://api.tcgdex.net/v2/${langCode}/dexids/${pokeId}`;
-    console.log(`[TCGdex] Fetching: ${url}`);
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 12000);
+    const t = setTimeout(() => ctrl.abort(), 10000);
     const r = await fetch(url, { signal: ctrl.signal });
     clearTimeout(t);
-    if (!r.ok) {
-      console.warn(`[TCGdex] ${url} returned HTTP ${r.status}`);
-      return [];
-    }
+    if (!r.ok) return [];
     const raw = await r.json();
-    console.log(`[TCGdex] ${langCode}/dexids/${pokeId} returned ${Array.isArray(raw) ? raw.length : 'non-array'} cards`);
     const briefs = Array.isArray(raw) ? raw : [];
-    if (!briefs.length) {
-      console.warn(`[TCGdex] No cards found for dexId ${pokeId} in ${langCode}`);
-      return [];
-    }
+    if (!briefs.length) return [];
 
-    // Step 2: fetch full details in parallel batches of 15
-    const BATCH = 15;
+    // Fetch full details in batches of 15
     let detailed = [];
+    const BATCH = 15;
     for (let i = 0; i < Math.min(briefs.length, 200); i += BATCH) {
-      const batch = briefs.slice(i, i + BATCH);
       const results = await Promise.all(
-        batch.map(async c => {
+        briefs.slice(i, i + BATCH).map(async c => {
           try {
-            const dr = await fetch(
-              `https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`,
-              { signal: AbortSignal.timeout(8000) }
-            );
+            const dr = await fetch(`https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`,
+              { signal: AbortSignal.timeout(8000) });
             return dr.ok ? await dr.json() : c;
           } catch { return c; }
         })
       );
       detailed = detailed.concat(results);
     }
-
-    // Step 3: normalise to our display format
     return detailed.map(c => ({
       id:       `tcgdex-${langCode}-${c.id}`,
       name:     c.name || '',
@@ -467,13 +451,59 @@ async function fetchTCGdex(pokeId, langCode) {
         releaseDate: c.set?.releaseDate || '',
       },
       tcgplayer: null,
-      _lang:    langCode,
-      _source:  'tcgdex',
+      _lang: langCode, _source: 'tcgdex',
     }));
   } catch(e) {
-    console.warn(`TCGdex ${langCode} fetch failed:`, e);
+    console.warn(`TCGdex ${langCode} failed:`, e);
     return [];
   }
+}
+
+/* ── pokemontcg.io broad search — catches JP/CN promos sold on TCGPlayer ──
+   These are cards like "Charizard 143/S-P Grand Prix" that are JP prints
+   but listed on TCGPlayer under Miscellaneous Cards & Products.
+   We fetch ALL prints by name and tag non-English ones by set series. */
+async function fetchAllPrints(name) {
+  // pokemontcg.io has ALL language cards that are sold on TCGPlayer
+  // They include JP promos, CN prints etc — just not filtered by language
+  const enc = encodeURIComponent(`name:"${name}"`);
+  try {
+    const r = await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=1`);
+    if (!r.ok) return [];
+    const j = await r.json();
+    let cards = j.data || [];
+    // Fetch extra pages if needed
+    const total = j.totalCount || cards.length;
+    if (total > 250) {
+      const pages = Math.ceil(total / 250);
+      for (let p = 2; p <= pages; p++) {
+        const rp = await fetch(`https://api.pokemontcg.io/v2/cards?q=${enc}&pageSize=250&page=${p}`);
+        const jp = await rp.json();
+        cards = cards.concat(jp.data || []);
+      }
+    }
+    return cards;
+  } catch(e) {
+    console.warn('fetchAllPrints failed:', e);
+    return [];
+  }
+}
+
+/* Detect if a pokemontcg.io card is Japanese/non-English based on set metadata */
+function detectLang(card) {
+  const setId = (card.set?.id || '').toLowerCase();
+  const series = (card.set?.series || '').toLowerCase();
+  const setName = (card.set?.name || '').toLowerCase();
+  // Japanese set identifiers used by pokemontcg.io
+  const jpSets = ['smp', 'sm1j', 'sm2', 'sm3', 'sm4', 'sm5', 'sm6', 'sm7', 'sm8',
+    'swshp', 'swsh1j', 'dp1j', 'bw1j', 'xy1j', 'sv1j', 'svp',
+    'mcap', 'sv6pt5']; // mcap = Miscellaneous Cards & Products (includes JP promos)
+  if (jpSets.some(s => setId.startsWith(s))) return 'ja';
+  if (setName.includes('japanese') || setName.includes('japan')) return 'ja';
+  if (setId.includes('cn') || setName.includes('chinese')) return 'zh-tw';
+  // Cards with Japanese text in card number (S-P, P promos)
+  if ((card.number || '').includes('S-P')) return 'ja';
+  return 'en';
 }
 
 /* File check */
@@ -491,31 +521,55 @@ function showFileErr(){
   document.getElementById('count-chip').textContent='— cards';
 }
 
-/* Fetch — dual API: pokemontcg.io for EN, tcgdex.net for JP/CN */
+/* Fetch — pokemontcg.io (all langs) + TCGdex (JP/CN) */
 async function fetchCards(name) {
   if (isFile()) { showFileErr(); buildBuy(); return; }
 
   const langLabel = {'en':'English','ja':'Japanese','zh-tw':'Chinese','all':'All Languages'}[activeLang] || activeLang;
   document.getElementById('card-area').innerHTML =
-    `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> — ${langLabel}…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">New set cards appear automatically</span></div>`;
+    `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> — ${langLabel}…</div>`;
 
   let cards = [];
   try {
     if (activeLang === 'en') {
+      // English only: exact EN cards from pokemontcg.io
       cards = await fetchEN(name);
-    } else if (activeLang === 'all') {
-      // Parallel fetch all three — fastest possible
+
+    } else if (activeLang === 'ja') {
+      // Japanese: TCGdex (JP physical sets) + pokemontcg.io broad (JP promos on TCGPlayer)
+      const [tcgdexJa, allPrints] = await Promise.all([
+        fetchTCGdex(curPoke.id, 'ja'),
+        fetchAllPrints(name),
+      ]);
+      // From allPrints, keep only non-EN cards and tag them
+      const jpFromTcgPlayer = allPrints
+        .filter(c => detectLang(c) === 'ja')
+        .map(c => ({ ...c, _lang: 'ja', _source: 'pokemontcg' }));
+      cards = [...tcgdexJa, ...jpFromTcgPlayer];
+
+    } else if (activeLang === 'zh-tw') {
+      // Chinese: TCGdex CN + pokemontcg.io CN cards
+      const [tcgdexCn, allPrints] = await Promise.all([
+        fetchTCGdex(curPoke.id, 'zh-tw'),
+        fetchAllPrints(name),
+      ]);
+      const cnFromTcgPlayer = allPrints
+        .filter(c => detectLang(c) === 'zh-tw')
+        .map(c => ({ ...c, _lang: 'zh-tw', _source: 'pokemontcg' }));
+      cards = [...tcgdexCn, ...cnFromTcgPlayer];
+
+    } else {
+      // All Languages: everything from all sources in parallel
       document.getElementById('card-area').innerHTML =
-        `<div class="status-block"><div class="spinner"></div><br>Fetching <strong>${name}</strong> in all languages…<br><span style="font-size:10px;color:var(--muted2);margin-top:6px;display:block">EN from TCGPlayer · JP + CN from TCGdex</span></div>`;
-      const [en, ja, zhTW] = await Promise.all([
-        fetchEN(name),
+        `<div class="status-block"><div class="spinner"></div><br>Fetching all <strong>${name}</strong> prints…</div>`;
+      const [allPrints, tcgdexJa, tcgdexCn] = await Promise.all([
+        fetchAllPrints(name),
         fetchTCGdex(curPoke.id, 'ja'),
         fetchTCGdex(curPoke.id, 'zh-tw'),
       ]);
-      cards = [...en, ...ja, ...zhTW];
-    } else {
-      // JP or CN via TCGdex — use Pokédex ID for language-independent lookup
-      cards = await fetchTCGdex(curPoke.id, activeLang);
+      // Tag allPrints by detected language
+      const tagged = allPrints.map(c => ({ ...c, _lang: detectLang(c), _source: 'pokemontcg' }));
+      cards = [...tagged, ...tcgdexJa, ...tcgdexCn];
     }
 
     // Deduplicate by id
@@ -740,7 +794,7 @@ async function refreshPrices() {
   if (!curPoke) return;
   const btn = document.getElementById('refresh-btn');
   if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
-  ALL = []; // clear cache so fetch runs fresh
+  ALL = [];
   await fetchCards(curPoke.name);
   if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
   setTimestamp();

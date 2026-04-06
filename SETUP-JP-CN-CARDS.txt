@@ -1,0 +1,56 @@
+═══════════════════════════════════════════════════════════
+ KANTO TCG — HOW TO ENABLE JAPANESE & CHINESE CARDS
+═══════════════════════════════════════════════════════════
+
+STEP 1 — Create a free Cloudflare account
+──────────────────────────────────────────
+1. Go to https://workers.cloudflare.com
+2. Sign up free — no credit card needed
+3. Verify your email and log in
+
+STEP 2 — Create the Worker (use inline editor, NOT file upload)
+────────────────────────────────────────────────────────────────
+1. Click "Workers & Pages" in the left sidebar
+2. Click "Create"
+3. Select the "Hello World" worker template
+4. Name it: kanto-tcg-proxy
+5. Click "Deploy"
+6. Click "Edit code" (blue button)
+7. In the editor: Ctrl+A to select all, then DELETE everything
+8. Open PROXY-WORKER.js from this zip in Notepad
+9. Ctrl+A → Ctrl+C to copy it all
+10. Paste it into the Cloudflare editor (Ctrl+V)
+11. Click "Save and Deploy" (top right)
+
+Your worker URL will be shown at the top, e.g.:
+  https://kanto-tcg-proxy.jayswizzybiz.workers.dev
+                           ^^^^^^^^^^^^
+                           Your Cloudflare subdomain
+
+STEP 3 — Add your worker URL to the site
+──────────────────────────────────────────
+Option A — Quick way (code editor like VS Code or Notepad++):
+  1. Open VS Code, File → Open Folder → select your site folder
+  2. Press Ctrl+Shift+H (Find and Replace across all files)
+  3. Find:    kanto-tcg-proxy.jaytee316.workers.dev
+  4. Replace: kanto-tcg-proxy.YOUR-SUBDOMAIN.workers.dev
+  5. Click Replace All
+  6. Save all files
+
+Option B — Manual way (Notepad):
+  1. Open pokemon.html in Notepad
+  2. Find this line: const PROXY_BASE = 'https://kanto-tcg-proxy.jaytee316.workers.dev';
+  3. Replace jaytee316 with your Cloudflare subdomain
+  4. Save — then repeat for every .html file in the folder
+     (there are 153 files so Option A is much easier)
+
+STEP 4 — Re-upload to GitHub
+──────────────────────────────
+Upload all .html files to your kantotcg repo, replacing old ones.
+Japanese and Chinese cards will now load on the site.
+
+═══════════════════════════════════════════════════════════
+ NOTE: Your Cloudflare subdomain (jayswizzybiz in the 
+ screenshot) stays the same for all workers you create.
+ It's shown on the workers.cloudflare.com dashboard.
+═══════════════════════════════════════════════════════════
