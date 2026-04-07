@@ -1,0 +1,84 @@
+═══════════════════════════════════════════════════════════
+ KANTO TCG — USER ACCOUNTS SETUP
+═══════════════════════════════════════════════════════════
+
+STEP 1 — Create D1 Database
+────────────────────────────
+1. Go to dash.cloudflare.com
+2. Left sidebar → "Workers & Pages" → "D1 SQL Database"
+3. Click "Create database"
+4. Name it: kantotcg
+5. Click "Create"
+6. Once created, click the database → "Console" tab
+7. Paste and run this SQL:
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT,
+  google_id TEXT,
+  display_name TEXT,
+  created_at INTEGER DEFAULT (unixepoch())
+);
+CREATE TABLE IF NOT EXISTS saved_cards (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  card_id TEXT NOT NULL,
+  card_name TEXT NOT NULL,
+  set_name TEXT,
+  price REAL,
+  image_url TEXT,
+  lang TEXT DEFAULT 'en',
+  saved_at INTEGER DEFAULT (unixepoch()),
+  UNIQUE(user_id, card_id)
+);
+
+8. Click "Execute" — you should see "Executed successfully"
+
+STEP 2 — Update your Worker (replace existing code)
+─────────────────────────────────────────────────────
+1. Go to Workers & Pages → raspy-pond-1f00 → Edit code
+2. Delete everything, paste the contents of AUTH-WORKER.js
+3. Don't save yet — go to Settings first
+
+STEP 3 — Bind the D1 database to your Worker
+──────────────────────────────────────────────
+1. In your worker → Settings → Bindings
+2. Click "Add binding" → "D1 Database"
+3. Variable name: DB
+4. Select the kantotcg database you just created
+5. Click Save
+
+STEP 4 — Add environment variables
+────────────────────────────────────
+Still in Settings → Variables and Secrets:
+Add these three:
+  JWT_SECRET = (any random long string, e.g. "kanto-tcg-secret-key-2024-xjf8k2lp")
+  GOOGLE_CLIENT_ID = (from Step 5 below, or skip for now)
+  GOOGLE_CLIENT_SECRET = (from Step 5 below, or skip for now)
+
+Then go back to Edit code → Save and Deploy
+
+STEP 5 — Google OAuth (optional, do this after email/password works)
+──────────────────────────────────────────────────────────────────────
+1. Go to console.cloud.google.com
+2. Create a new project (e.g. "Kanto TCG")
+3. APIs & Services → Credentials → Create Credentials → OAuth Client ID
+4. Application type: Web application
+5. Authorised redirect URIs: add https://YOUR-SITE.com/auth-callback.html
+6. Copy the Client ID and Client Secret
+7. Add them as environment variables in your Worker (Step 4)
+8. In auth.js, replace YOUR_GOOGLE_CLIENT_ID with your actual Client ID
+9. Re-upload auth.js to GitHub
+
+STEP 6 — Upload site files to GitHub
+──────────────────────────────────────
+Upload all files from this zip to your kantotcg GitHub repo.
+
+DONE! Test by:
+1. Going to any Pokémon page
+2. Clicking "Sign Up" in the top right
+3. Creating an account with email + password
+4. Clicking ♡ on any card to save it
+5. Clicking "♡ Collection" in the nav to see your saved cards
+═══════════════════════════════════════════════════════════
