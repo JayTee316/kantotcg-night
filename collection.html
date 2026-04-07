@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Collection — Kanto TCG</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .coll-hero { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 40px 40px 32px; }
+  .coll-hero-inner { max-width: 1280px; margin: 0 auto; }
+  .coll-title { font-family: var(--display); font-size: 32px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+  .coll-sub { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .coll-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+  .coll-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 20px; min-width: 130px; }
+  .coll-stat-val { font-family: var(--display); font-size: 24px; font-weight: 900; color: var(--fr-red); }
+  .coll-stat-val.green { color: var(--lg-green); }
+  .coll-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted2); margin-top: 2px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 40px 80px; }
+  .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .coll-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+    overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.15s;
+  }
+  .coll-card:hover { border-color: var(--border2); }
+  .coll-card-img { background: var(--bg2); aspect-ratio: 5/7; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--border); }
+  .coll-card-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+  .coll-card-body { padding: 10px 12px 0; flex: 1; }
+  .coll-card-name { font-family: var(--display); font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+  .coll-card-set { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .coll-card-footer { border-top: 1px solid var(--border); padding: 8px 12px; background: var(--bg2); display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+  .coll-price { font-family: var(--display); font-size: 18px; font-weight: 800; color: var(--fr-red); }
+  .coll-remove { background: none; border: 1px solid var(--border2); color: var(--muted); font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: var(--r-sm); cursor: pointer; text-transform: uppercase; letter-spacing: 0.3px; transition: all 0.12s; }
+  .coll-remove:hover { border-color: var(--fr-red); color: var(--fr-red); }
+  .sort-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .sort-bar select { background: var(--surface); border: 1px solid var(--border2); color: var(--text); font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 6px 28px 6px 10px; border-radius: var(--r-sm); cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(192,194,208,0.7)' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state h2 { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text2); margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; font-weight: 500; line-height: 1.7; }
+  .empty-state a { color: var(--fr-red); text-decoration: none; font-weight: 700; }
+  .not-logged { text-align: center; padding: 100px 20px; }
+  .not-logged h2 { font-family: var(--display); font-size: 24px; font-weight: 900; color: var(--text); margin-bottom: 10px; }
+  .not-logged p { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 500; }
+  .coll-lang-badge { font-size: 9px; background: rgba(0,0,0,0.5); color: var(--text2); padding: 2px 5px; border-radius: 2px; position: absolute; top: 5px; left: 5px; }
+  @media (max-width:700px) { .coll-hero { padding: 28px 16px 22px; } main { padding: 20px 14px 60px; } }
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a class="nav-logo" href="index.html">
+      <svg height="26" viewBox="0 0 160 26" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="13" cy="13" r="10" fill="none" stroke="#c02818" stroke-width="2"/>
+        <line x1="3" y1="13" x2="23" y2="13" stroke="#c02818" stroke-width="2"/>
+        <circle cx="13" cy="13" r="3.5" fill="#c02818"/>
+        <circle cx="13" cy="13" r="2" fill="#050508"/>
+        <text x="30" y="18" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="15" fill="#c8cad8" letter-spacing="2">KANTO</text>
+        <text x="97" y="18" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="15" fill="#c02818" letter-spacing="2">TCG</text>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#pokemon-section">Pokédex</a>
+      <a class="nav-link active" href="collection.html">My Collection</a>
+    </div>
+    <div id="nav-auth-area" style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:16px;"></div>
+  </div>
+</nav>
+
+<header class="coll-hero">
+  <div class="coll-hero-inner">
+    <div class="coll-title">My Collection</div>
+    <div class="coll-sub">Your saved Pokémon TCG cards — track values and manage your wishlist</div>
+    <div class="coll-stats" id="coll-stats" style="display:none">
+      <div class="coll-stat"><div class="coll-stat-val" id="stat-count">0</div><div class="coll-stat-label">Cards Saved</div></div>
+      <div class="coll-stat"><div class="coll-stat-val green" id="stat-total">$0.00</div><div class="coll-stat-label">Total Value</div></div>
+      <div class="coll-stat"><div class="coll-stat-val" id="stat-avg" style="color:var(--gold)">$0.00</div><div class="coll-stat-label">Avg per Card</div></div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div class="status-block"><div class="spinner"></div><br>Loading…</div>
+</main>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalClick(event)">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕ Close</button>
+    <div class="modal-inner" id="modal-inner" style="flex-direction:column;gap:0;padding:28px"></div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>Card images via <a href="https://pokemontcg.io" target="_blank">Pokémon TCG API</a> · Fan-made collector reference · Not affiliated with Nintendo / The Pokémon Company</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="auth.js"></script>
+<script>
+const WORKER = 'https://raspy-pond-1f00.jayswizzybiz.workers.dev';
+
+function closeModalClick(e) { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); }
+
+async function loadCollection() {
+  const token = getToken();
+  if (!token) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="not-logged">
+        <h2>Sign in to view your collection</h2>
+        <p>Save cards from any Pokémon page and track their total value here.</p>
+        <button class="site-btn primary" onclick="showAuthModal('login')" style="margin-right:8px">Sign In</button>
+        <button class="site-btn ghost" onclick="showAuthModal('signup')">Create Account</button>
+      </div>`;
+    return;
+  }
+  try {
+    const res = await fetch(`${WORKER}/collection`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (res.status === 401) { clearToken(); loadCollection(); return; }
+    renderCollection(data);
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `<div class="status-block">Connection error. Try refreshing.</div>`;
+  }
+}
+
+let allCards = [];
+function renderCollection({ cards, total }) {
+  allCards = cards;
+  const stats = document.getElementById('coll-stats');
+  stats.style.display = 'flex';
+  document.getElementById('stat-count').textContent = cards.length;
+  document.getElementById('stat-total').textContent = '$' + total.toFixed(2);
+  document.getElementById('stat-avg').textContent = cards.length ? '$' + (total / cards.length).toFixed(2) : '$0.00';
+
+  if (!cards.length) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">♡</div>
+        <h2>No cards saved yet</h2>
+        <p>Browse the <a href="index.html">Pokédex</a> and click the ♡ on any card to save it here.</p>
+      </div>`;
+    return;
+  }
+
+  const sortSel = `<div class="sort-bar">
+    <select onchange="sortCards(this.value)">
+      <option value="newest">Recently saved</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="name">Name A–Z</option>
+    </select>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto">${cards.length} card${cards.length!==1?'s':''} · Total: <strong style="color:var(--lg-green)">$${total.toFixed(2)}</strong></span>
+  </div>`;
+
+  document.getElementById('main-content').innerHTML = sortSel + `<div class="coll-grid" id="coll-grid"></div>`;
+  renderGrid(allCards);
+}
+
+function renderGrid(cards) {
+  document.getElementById('coll-grid').innerHTML = cards.map(c => `
+    <div class="coll-card" id="ccard-${c.card_id.replace(/[^a-z0-9]/gi,'_')}">
+      <div class="coll-card-img">
+        ${c.image_url ? `<img src="${c.image_url}" alt="${c.card_name}" loading="lazy" decoding="async">` : '<span style="font-size:32px;opacity:0.15">🃏</span>'}
+        ${c.lang && c.lang !== 'en' ? `<span class="coll-lang-badge">${c.lang === 'ja' ? '🇯🇵 JP' : '🇨🇳 CN'}</span>` : ''}
+      </div>
+      <div class="coll-card-body">
+        <div class="coll-card-name">${c.card_name}</div>
+        <div class="coll-card-set">${c.set_name || ''}</div>
+      </div>
+      <div class="coll-card-footer">
+        <span class="coll-price">${c.price ? '$'+c.price.toFixed(2) : '—'}</span>
+        <button class="coll-remove" onclick="removeCard('${c.card_id.replace(/'/g,"\\'")}', this)">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function sortCards(val) {
+  let sorted = [...allCards];
+  if (val === 'price-desc') sorted.sort((a,b) => (b.price||0)-(a.price||0));
+  else if (val === 'price-asc') sorted.sort((a,b) => (a.price||0)-(b.price||0));
+  else if (val === 'name') sorted.sort((a,b) => a.card_name.localeCompare(b.card_name));
+  renderGrid(sorted);
+}
+
+async function removeCard(cardId, btn) {
+  const token = getToken();
+  btn.textContent = '…';
+  btn.disabled = true;
+  await fetch(`${WORKER}/collection/${encodeURIComponent(cardId)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+  allCards = allCards.filter(c => c.card_id !== cardId);
+  const total = allCards.reduce((s,c) => s+(c.price||0), 0);
+  renderCollection({ cards: allCards, total });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+  loadCollection();
+});
+</script>
+<script src="theme.js"></script>
+</body>
+</html>

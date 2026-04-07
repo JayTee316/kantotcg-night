@@ -38,6 +38,18 @@
   [data-theme="gb"] .lang-btn { border-color: var(--border2); color: var(--muted); font-family: 'Press Start 2P', monospace; font-size: 7px; border-radius: 0; }
   [data-theme="gb"] .lang-btn.active { background: var(--surface2); color: var(--text); border-color: var(--fr-red); }
 
+  /* ── HEART / SAVE BUTTON ── */
+  .heart-btn {
+    background: none; border: 1px solid var(--border2); color: var(--muted);
+    font-size: 14px; cursor: pointer; width: 30px; height: 28px;
+    border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; flex-shrink: 0; padding: 0; line-height: 1;
+    font-family: sans-serif;
+  }
+  .heart-btn:hover { border-color: var(--fr-red); color: var(--fr-red); }
+  .heart-btn.heart-saved { color: var(--fr-red); border-color: var(--fr-red); background: rgba(192,40,24,0.08); }
+  /* Auth modal input fix */
+  #modal-inner input { color-scheme: dark; }
   /* ── HERO ── */
   .poke-hero {
     position: relative; overflow: hidden;
@@ -181,7 +193,9 @@
       <a class="nav-link" href="charizard.html">Charizard</a>
       <a class="nav-link" href="mewtwo.html">Mewtwo</a>
       <a class="nav-link" href="mew.html">Mew</a>
+      <a class="nav-link" href="collection.html">♡ Collection</a>
     </div>
+    <div id="nav-auth-area" style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:12px"></div>
     <div class="nav-search" style="position:relative">
       <input type="text" id="nav-search-input" placeholder="Go to Pokémon…"
              oninput="navSearchInput(this.value)"
@@ -404,56 +418,34 @@ async function fetchEN(name) {
 }
 
 /* Fetch JP or CN cards from TCGdex — uses Pokédex number to find all prints */
-/* ── TCGdex fetch: all JP/CN cards by Pokédex number ──
-   Uses a CORS proxy (Cloudflare Worker) to bypass browser cross-origin restrictions.
-   Set PROXY_BASE to your deployed worker URL after following PROXY-WORKER.js instructions.
-   Falls back to direct fetch (works in dev / local server). */
-
-// SET THIS after deploying PROXY-WORKER.js to Cloudflare Workers:
-const PROXY_BASE = 'https://raspy-pond-1f00.jayswizzybiz.workers.dev';
-// If you haven't deployed the proxy yet, leave as-is — direct fetch will be attempted
-
-function tcgdexUrl(path) {
-  // Try proxy first (required for GitHub Pages), fall back to direct
-  if (PROXY_BASE && !PROXY_BASE.includes('YOUR_WORKER')) {
-    return `${PROXY_BASE}/proxy/v2${path}`;
-  }
-  return `https://api.tcgdex.net/v2${path}`;
-}
-
+/* ── TCGdex fetch: all JP/CN cards by Pokédex number ── */
 async function fetchTCGdex(pokeId, langCode) {
   try {
-    // Step 1: Get list of all cards for this Pokédex number
-    const listUrl = tcgdexUrl(`/${langCode}/dexids/${pokeId}`);
+    const url = `https://api.tcgdex.net/v2/${langCode}/dexids/${pokeId}`;
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 15000);
-    const r = await fetch(listUrl, { signal: ctrl.signal });
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    const r = await fetch(url, { signal: ctrl.signal });
     clearTimeout(t);
-    if (!r.ok) {
-      console.warn(`TCGdex list failed: HTTP ${r.status} for ${listUrl}`);
-      return [];
-    }
+    if (!r.ok) return [];
     const raw = await r.json();
     const briefs = Array.isArray(raw) ? raw : [];
     if (!briefs.length) return [];
 
-    // Step 2: Fetch full card details in parallel batches
+    // Fetch full details in batches of 15
     let detailed = [];
     const BATCH = 15;
     for (let i = 0; i < Math.min(briefs.length, 200); i += BATCH) {
       const results = await Promise.all(
         briefs.slice(i, i + BATCH).map(async c => {
           try {
-            const dr = await fetch(tcgdexUrl(`/${langCode}/cards/${c.id}`),
-              { signal: AbortSignal.timeout(10000) });
+            const dr = await fetch(`https://api.tcgdex.net/v2/${langCode}/cards/${c.id}`,
+              { signal: AbortSignal.timeout(8000) });
             return dr.ok ? await dr.json() : c;
           } catch { return c; }
         })
       );
       detailed = detailed.concat(results);
     }
-
-    // Step 3: Normalise to our card shape
     return detailed.map(c => ({
       id:       `tcgdex-${langCode}-${c.id}`,
       name:     c.name || '',
@@ -476,7 +468,7 @@ async function fetchTCGdex(pokeId, langCode) {
       _lang: langCode, _source: 'tcgdex',
     }));
   } catch(e) {
-    console.warn(`TCGdex ${langCode} failed:`, e.message);
+    console.warn(`TCGdex ${langCode} failed:`, e);
     return [];
   }
 }
@@ -836,6 +828,7 @@ async function refreshPrices() {
   if (ai) ai.style.display = 'block';
 })();
 </script>
+<script src="auth.js"></script>
 <script src="theme.js"></script>
 </body>
 </html>

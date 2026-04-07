@@ -38,6 +38,18 @@
   [data-theme="gb"] .lang-btn { border-color: var(--border2); color: var(--muted); font-family: 'Press Start 2P', monospace; font-size: 7px; border-radius: 0; }
   [data-theme="gb"] .lang-btn.active { background: var(--surface2); color: var(--text); border-color: var(--fr-red); }
 
+  /* ── HEART / SAVE BUTTON ── */
+  .heart-btn {
+    background: none; border: 1px solid var(--border2); color: var(--muted);
+    font-size: 14px; cursor: pointer; width: 30px; height: 28px;
+    border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; flex-shrink: 0; padding: 0; line-height: 1;
+    font-family: sans-serif;
+  }
+  .heart-btn:hover { border-color: var(--fr-red); color: var(--fr-red); }
+  .heart-btn.heart-saved { color: var(--fr-red); border-color: var(--fr-red); background: rgba(192,40,24,0.08); }
+  /* Auth modal input fix */
+  #modal-inner input { color-scheme: dark; }
   /* ── HERO ── */
   .poke-hero {
     position: relative; overflow: hidden;
@@ -181,7 +193,9 @@
       <a class="nav-link" href="charizard.html">Charizard</a>
       <a class="nav-link" href="mewtwo.html">Mewtwo</a>
       <a class="nav-link" href="mew.html">Mew</a>
+      <a class="nav-link" href="collection.html">♡ Collection</a>
     </div>
+    <div id="nav-auth-area" style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:12px"></div>
     <div class="nav-search" style="position:relative">
       <input type="text" id="nav-search-input" placeholder="Go to Pokémon…"
              oninput="navSearchInput(this.value)"
@@ -814,6 +828,7 @@ async function refreshPrices() {
   if (ai) ai.style.display = 'block';
 })();
 </script>
+<script src="auth.js"></script>
 <script src="theme.js"></script>
 </body>
 </html>
