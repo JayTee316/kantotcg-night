@@ -179,21 +179,21 @@ function updateNavAuth() {
   const user = getUser();
   if (user) {
     area.innerHTML = `
-      <a href="collection.html" style="font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 10px;height:52px;display:flex;align-items:center;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:0.3px;transition:color 0.12s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">♡ My Collection</a>
+      <a href="collection.html" style="font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 12px;height:52px;display:flex;align-items:center;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:0.3px;transition:color 0.12s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">My Collection</a>
       <div style="position:relative">
         <button onclick="toggleUserMenu()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:12px;font-weight:700;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;gap:6px">
           <span style="width:22px;height:22px;border-radius:50%;background:var(--fr-red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff">${(user.name||user.email||'?')[0].toUpperCase()}</span>
           ${(user.name||user.email||'').split(' ')[0]}
         </button>
         <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100%+6px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-lg);min-width:160px;z-index:400;box-shadow:0 8px 24px rgba(0,0,0,0.5);overflow:hidden">
-          <a href="collection.html" style="display:block;padding:10px 14px;font-size:12px;font-weight:600;color:var(--text);text-decoration:none;border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''">♡ My Collection</a>
+          <a href="collection.html" style="display:block;padding:10px 14px;font-size:12px;font-weight:600;color:var(--text);text-decoration:none;border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''">My Collection</a>
           <button onclick="signOut()" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''">Sign Out</button>
         </div>
       </div>`;
   } else {
     area.innerHTML = `
-      <button onclick="showAuthModal('login')" style="background:transparent;border:1px solid var(--border2);color:var(--text2);font-family:var(--sans);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;text-transform:uppercase;letter-spacing:0.3px;margin-right:6px;transition:all 0.12s" onmouseover="this.style.borderColor='var(--fr-red)';this.style.color='var(--fr-red)'" onmouseout="this.style.borderColor='';this.style.color='var(--text2)'">Sign In</button>
-      <button onclick="showAuthModal('signup')" style="background:var(--fr-red);border:1px solid var(--fr-red-dark);color:#fff;font-family:var(--sans);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;text-transform:uppercase;letter-spacing:0.3px;transition:all 0.12s">Sign Up</button>`;
+      <button onclick="showAuthModal('login')" style="background:transparent;border:1px solid var(--border2);color:var(--muted);font-family:var(--sans);font-size:11px;font-weight:700;padding:0 14px;height:34px;border-radius:var(--r-sm);cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;margin-right:5px;transition:all 0.12s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border3)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">Sign In</button>
+      <button onclick="showAuthModal('signup')" style="background:var(--fr-red);border:1px solid var(--fr-red-dark);color:#fff;font-family:var(--sans);font-size:11px;font-weight:800;padding:0 14px;height:34px;border-radius:var(--r-sm);cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;transition:background 0.12s" onmouseover="this.style.background='var(--fr-red-light)'" onmouseout="this.style.background='var(--fr-red)'">Sign Up</button>`;
   }
 }
 

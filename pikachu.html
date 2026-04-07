@@ -107,7 +107,7 @@
     background: var(--bg); border-bottom: 3px solid var(--border);
     box-shadow: 0 2px 16px rgba(0,0,0,0.4); padding: 0 40px;
   }
-  .page-controls-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; }
+  .page-controls-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; min-width: 0; }
   .page-controls-inner::-webkit-scrollbar { display: none; }
   .era-tab {
     padding: 14px 16px; font-size: 12px; font-weight: 800;
@@ -117,13 +117,16 @@
   }
   .era-tab:hover { color: var(--text); }
   .era-tab.active { color: var(--fr-red); border-bottom-color: var(--fr-red); }
-  .ctrl-right { margin-left: auto; display: flex; align-items: center; gap: 12px; padding: 10px 0 10px 20px; flex-shrink: 0; }
+  .ctrl-right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 10px 0 10px 12px; flex-shrink: 0; min-width: 0; }
   .count-chip { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
   select.ctrl-select {
     background: var(--bg); border: 2px solid var(--border); color: var(--text);
     font-family: var(--sans); font-size: 12px; font-weight: 700;
     padding: 6px 10px; border-radius: var(--r-sm); cursor: pointer; outline: none;
+    max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    direction: rtl; text-align: right;
   }
+  select.ctrl-select option { direction: ltr; text-align: left; }
   select.ctrl-select:focus { border-color: var(--fr-red); }
 
   main { max-width: 1280px; margin: 0 auto; padding: 40px 40px 80px; }
@@ -184,7 +187,7 @@
         <circle cx="13" cy="13" r="3.5" fill="#c02818"/>
         <circle cx="13" cy="13" r="2" fill="#050508"/>
         <text x="30" y="18" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="15" fill="#c8cad8" letter-spacing="2">KANTO</text>
-        <text x="97" y="18" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="15" fill="#c02818" letter-spacing="2">TCG</text>
+        <text x="88" y="18" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="15" fill="#c02818" letter-spacing="2">TCG</text>
       </svg>
     </a>
     <div class="nav-links" id="nav-links">
@@ -193,7 +196,7 @@
       <a class="nav-link" href="charizard.html">Charizard</a>
       <a class="nav-link" href="mewtwo.html">Mewtwo</a>
       <a class="nav-link" href="mew.html">Mew</a>
-      <a class="nav-link" href="collection.html">♡ Collection</a>
+      <a class="nav-link" href="collection.html">Collection</a>
     </div>
     <div id="nav-auth-area" style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:12px"></div>
     <div class="nav-search" style="position:relative">
@@ -676,6 +679,9 @@ function cardHTML(c,idx){
       <a class="action-btn btn-buy" href="${buy}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Buy →</a>
       <a class="action-btn btn-psa" href="${psa}" target="_blank" rel="noopener" onclick="event.stopPropagation()">PSA Pop</a>
       <a class="action-btn btn-sales" href="${ebay}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Sales</a>
+      <button class="heart-btn" data-card-id="${c.id}"
+        onclick="event.stopPropagation();toggleSaveCard(${JSON.stringify(c.id)},${JSON.stringify(c.name||'')},${JSON.stringify(c.set?.name||'')},${pv(c)||0},${JSON.stringify(img||'')},${JSON.stringify(c._lang||'en')},this)"
+        title="Save to My Collection">♡</button>
     </div>
   </div>`;
 }

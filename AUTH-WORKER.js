@@ -56,6 +56,8 @@ async function getUser(request, env) {
 
 export default {
   async fetch(request, env) {
+    // Support both DB and db binding names
+    env.DB = env.DB || env.db;
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
     const url = new URL(request.url);
